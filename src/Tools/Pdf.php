@@ -2,6 +2,7 @@
 
 namespace Cubo\Tools;
 
+use Cubo\Exceptions\MissingDependencyException;
 use Mpdf\Mpdf;
 
 /**
@@ -132,6 +133,11 @@ final class Pdf
      */
     private static function makeMpdf(string $orientation, string $margins = '0,0,5,0'): Mpdf
     {
+        // o mpdf e opcional (suggest, nao require): 94MB que so esta classe usa
+        if (!class_exists(Mpdf::class)) {
+            throw MissingDependencyException::for('mpdf/mpdf', self::class);
+        }
+
         [$left, $right, $top, $bottom] = array_pad(array_map('intval', explode(',', $margins)), 4, 0);
 
         return new Mpdf([

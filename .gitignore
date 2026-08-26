@@ -4,30 +4,22 @@ Thumbs.db
 *.log
 *.tmp
 *.temp
-app/Cubo/log/*
-!app/Cubo/log/.gitkeep
-app/Cubo/tmp/
-app/Cubo/cache/
-app/Cubo/sessions/
 
 /vendor/
-/app/Cubo2/vendor/
 coverage/
 node_modules/
 dist/
 build/
 
-# resultdos de testes
+# resultados de testes
 .phpunit.cache/
 .phpunit.result.cache
 
-#claude
+# claude
 /.claude
 CLAUDE.md
 
-# app/Netflex/models_v2
-connections.json
-schema-core.json
-custom-report.md
+# saida do item 0: o que foi tirado do framework, a apagar quando nao fizer falta
+/_quarentena/
 
 toDo/

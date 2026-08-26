@@ -8,16 +8,12 @@
          failOnRisky="true">
     <testsuites>
         <testsuite name="Unit">
-            <directory>app/Cubo2/tests/Unit</directory>
-        </testsuite>
-        <testsuite name="Netflex">
-            <directory>app/Netflex/tests</directory>
+            <directory>tests/Unit</directory>
         </testsuite>
     </testsuites>
     <source>
         <include>
-            <directory>app/Cubo2/src</directory>
-            <directory>app/Netflex/src</directory>
+            <directory>src</directory>
         </include>
     </source>
 </phpunit>

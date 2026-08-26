@@ -1,27 +1,28 @@
 {
-    "name": "netflex/netflexrefac",
-    "description": "Netflex - Cubo Framework (core PHP 8+) e aplicacao",
+    "name": "eeomts/cubo",
+    "description": "Cubo Framework - core PHP 8+",
+    "type": "library",
+    "license": "proprietary",
     "require": {
         "php": ">=8.2",
-        "illuminate/database": "^11.0",
+        "illuminate/database": "^11.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
         "mpdf/mpdf": "^8.2"
+    },
+    "suggest": {
+        "mpdf/mpdf": "^8.2 -- necessario para Cubo\\Tools\\Pdf (requer tambem a extensao gd)"
     },
     "autoload": {
         "psr-4": {
-            "Cubo\\": "app/Cubo2/src/",
-            "PHPMailer\\PHPMailer\\": "app/Cubo2/PHPMailer/src/",
-            "Netflex\\": "app/Netflex/src/",
-            "Netflex\\Models\\": "app/Netflex/models_v2/"
+            "Cubo\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Cubo\\Tests\\": "app/Cubo2/tests/",
-            "Netflex\\Tests\\": "app/Netflex/tests/"
+            "Cubo\\Tests\\": "tests/"
         }
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^11.0"
     },
     "scripts": {
         "test": "phpunit"
