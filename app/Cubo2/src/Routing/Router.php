@@ -1,0 +1,145 @@
+<?php
+
+/**
+ * Roteador de URL.
+ * Traca as rotas e define controlador, metodo e parametros a partir da REQUEST_URI.
+ *
+ * @package Cubo
+ * @author v1 Joao / v1.1 Cristiano
+ *
+ * V2 - core cubo atualizado para php 8+
+ * @author Mateus - github.com/eeomts
+ */
+
+namespace Cubo\Routing;
+
+use Cubo\Config;
+
+class Router
+{
+    /**
+     * @param SegmentMapper $mapper diz o que os segmentos de cabeca significam.
+     *                              Sem argumento, vale o padrao controlador/acao.
+     */
+    public function __construct(
+        private SegmentMapper $mapper = new ControllerActionMapper()
+    ) {}
+
+    /**
+     * Le a REQUEST_URI, quebra em segmentos e monta a rota.
+     * Quem da significado aos primeiros segmentos e o SegmentMapper.
+     */
+    public function parseUrl(): Route
+    {
+        // request = SERVER_NAME + REQUEST_URI menos o dominio do framework
+        $request = str_replace(
+            CUBO_DIR_NAME,
+            '',
+            $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI']
+        );
+
+        // cada segmento vira camelCase (ex: grid-menus -> gridMenus)
+        $parsed = [];
+        foreach (explode('/', $request) as $segment) {
+            $parsed[] = $this->toCamelCase($segment);
+        }
+
+        $head = $this->mapper->head($parsed);
+        [$params, $rawParams] = $this->parseParams($parsed, $head->consumed);
+
+        return new Route(
+            $head->controller,
+            $head->method,
+            $params,
+            $rawParams,
+            $head->module
+        );
+    }
+
+    /**
+     * Pares chave/valor que vem depois da cabeca da rota.
+     *
+     * @param list<string> $segments
+     * @param int $from indice do primeiro segmento de parametro
+     * @return array{0: array<string,string>, 1: list<string>} [params, rawParams]
+     */
+    private function parseParams(array $segments, int $from): array
+    {
+        $params = [];
+        $rawParams = [];
+
+        for ($i = $from; $i < count($segments); $i += 2) {
+            $rawParams[] = $segments[$i];
+
+            $key = strtolower($segments[$i]);
+            $value = $segments[$i + 1] ?? '';
+
+            // quirk do v1: chave repetida concatena os valores com '_'
+            if (isset($params[$key])) {
+                $params[$key] .= "_{$value}";
+            } else {
+                $params[$key] = $value;
+            }
+        }
+
+        return [$params, $rawParams];
+    }
+
+    /**
+     * Transforma um path de metodo em camelCase, preservando o controlador.
+     * ex: grid-menus-filho -> gridMenusFilho ; ctrl/grid-menus -> Ctrl/gridMenus
+     *
+     * Usado na permissao de menus por usuario.
+     */
+    public function transformMethod(string $value): string
+    {
+        // se vier "controlador/metodo", so o controlador recebe ucfirst
+        $parts = explode('/', $value);
+        if (count($parts) > 1) {
+            $value = ucfirst($parts[0]) . '/' . $parts[1];
+        }
+
+        return $this->toCamelCase($value);
+    }
+
+    /**
+     * Nome do modulo da rota, em Title Case.
+     * Lia a global __CONTROLLER__; agora recebe a rota.
+     *
+     * @param Route $route rota de onde sai o nome (modulo, ou controlador sem modulo)
+     */
+    public function getNameModule(Route $route): string
+    {
+        return ucwords(strtolower($route->module ?? $route->controller));
+    }
+
+    /**
+     * URL base para exportacao/impressao (host + modulo).
+     */
+    public function getUrlExport(Route $route): string
+    {
+        return Config::getInstance()->getConfig('ini.cubo.host') . $this->getNameModule($route);
+    }
+
+    /**
+     * Converte um segmento "com-hifen" em camelCase.
+     * Primeiro pedaco fica como esta; os seguintes recebem ucfirst.
+     * Sem hifen: so faz ucfirst quando nao ha 2o caractere (quirk mantido).
+     */
+    private function toCamelCase(string $value): string
+    {
+        $parts = explode('-', $value);
+
+        if (count($parts) > 1) {
+            $out = '';
+            foreach ($parts as $i => $part) {
+                $out .= $i > 0 ? ucfirst($part) : $part;
+            }
+            return $out;
+        }
+
+        // sem hifen: quirk do v1 -> ucfirst so quando 2o caractere e vazio/'0'
+        $second = $value[1] ?? '';
+        return ($second === '' || $second === '0') ? ucfirst($value) : $value;
+    }
+}
