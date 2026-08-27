@@ -5,9 +5,6 @@ namespace Cubo\Exceptions;
 /**
  * Lançada quando uma feature opcional é usada sem o pacote que ela exige.
  *
- * O Cubo declara em "suggest" o que só uma classe usa, para não impor o peso a
- * todo projeto. Quem chama a classe sem instalar o pacote cai aqui.
- *
  * @package Cubo
  * @author Mateus - github.com/eeomts
  */

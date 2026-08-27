@@ -21,8 +21,8 @@ use Cubo\Routing\Router;
 final class Cubo
 {
     /**
-     * @param string $appFolder Pasta da aplicacao (ex.: 'App'), onde vive
-     *                          config/config.ini.
+     * @param string $appRoot Caminho ABSOLUTO da raiz da aplicacao, onde vive
+     *                          config/config.ini. O index.php passa __DIR__.
      * @param string|null $mainController Controlador chamado em TODAS as
      *                          requisicoes, em FQCN. Sem ele, o controlador sai
      *                          da propria URL.
@@ -32,7 +32,7 @@ final class Cubo
      * @param Router $router Injetavel para teste; o padrao serve em producao.
      */
     public function __construct(
-        private readonly string $appFolder,
+        private readonly string $appRoot,
         private readonly ?string $mainController = null,
         private readonly string $controllerNamespace = '',
         private readonly Router $router = new Router(),
@@ -59,7 +59,7 @@ final class Cubo
     public function bootstrap(): void
     {
         $config = Config::getInstance();
-        $config->setAppFolder($this->appFolder);
+        $config->setAppRoot($this->appRoot);
         $config->initializeConfig();
     }
 
@@ -103,50 +103,3 @@ final class Cubo
         return new $class($route);
     }
 }
-
-/*
- * GUIA DE MIGRACAO - Cubo -> Cubo\Cubo
- *
- * COMO FICA O index.php DA APP
- *
- *     require __DIR__ . '/../vendor/autoload.php';
- *
- *     use Cubo\Controller;
- *     use Cubo\Cubo;
- *     use App\Views\DefaultView;
- *
- *     Controller::setDefaultViewFactory(fn() => DefaultView::getInstance());
- *
- *     (new Cubo('App', 'App\Controllers\CoreController'))->run();
- *
- * RENOMEADOS
- *   getAppFoldeRoot -> Cubo\Config::getInstance()->getAppFolderRoot()
- *   parseUrl -> Cubo\Routing\Router::parseUrl(): Route
- *
- * NOVOS
- *   bootstrap() -- configuracao do framework, separada do despacho
- *   dispatch(Route): Controller
- *
- * MUDOU
- *   setAppFolder / setMainController -- viraram parametros do construtor
- *   controlador vindo da URL -- tem de ser um Cubo\Controller
- *   prefixo de namespace dos controladores -- parametro do construtor
- *
- * A FACHADA ESTATICA CAIU
- *   Cubo::Config() -> Cubo\Config::getInstance()
- *   Cubo::Session() -> Cubo\Session::getInstance()
- *   Cubo::Db() -> Cubo\Database\Db::getInstance()
- *   Cubo::Router() -> new Cubo\Routing\Router()
- *   Cubo::Auth() -> new Cubo\Auth\Auth($repositorioDeChaves)
- *   Cubo::Tools() -> as classes de Cubo\Tools, importadas uma a uma
- *   Cubo::Autoload() -> Composer
- *
- * DESCARTADOS
- *   sendMail X sem substituto no framework
- *   getPhpMailer / getPhpMailerS X instancie PHPMailer\PHPMailer\PHPMailer
- *   getInstance X o kernel e instanciado uma vez pelo index.php
- *   setConfig / getSecurit / _loadAppIni X stubs vazios
- *   _initializeSecurity / activeSecurity X sem substituto, NAO REINTRODUZIR
- *   _initializeAutoload / _registerAppFolder X Composer
- *   _app_folder_root X ver Cubo\Config
- */

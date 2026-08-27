@@ -21,18 +21,25 @@ final class ConfigTest extends TestCase
         $this->config = (new ReflectionClass(Config::class))->newInstanceWithoutConstructor();
     }
 
-    public function testGetAppFolderRootLancaQuandoNaoDefinido(): void
+    public function testGetAppRootLancaQuandoNaoDefinido(): void
     {
         $this->expectException(RuntimeException::class);
 
-        $this->config->getAppFolderRoot();
+        $this->config->getAppRoot();
     }
 
-    public function testSetAppFolderDefineORoot(): void
+    public function testSetAppRootDefineARaiz(): void
     {
-        $this->config->setAppFolder('Cms');
+        $this->config->setAppRoot('/var/www/blog');
 
-        $this->assertSame('Cms', $this->config->getAppFolderRoot());
+        $this->assertSame('/var/www/blog', $this->config->getAppRoot());
+    }
+
+    public function testSetAppRootRemoveSeparadorFinal(): void
+    {
+        $this->config->setAppRoot('/var/www/blog/');
+
+        $this->assertSame('/var/www/blog', $this->config->getAppRoot());
     }
 
     public function testGetConfigLeValorAninhadoPorPonto(): void

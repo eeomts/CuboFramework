@@ -18,6 +18,7 @@ use ReflectionProperty;
 final class CuboTest extends TestCase
 {
     private const NS = 'Cubo\\Tests\\Support\\Controllers\\';
+    private const APP_ROOT = __DIR__;
 
     protected function setUp(): void
     {
@@ -34,7 +35,7 @@ final class CuboTest extends TestCase
 
     public function testDispatchRodaOCicloDoControlador(): void
     {
-        $kernel = new Cubo('Netflex', SpyController::class);
+        $kernel = new Cubo(self::APP_ROOT, SpyController::class);
 
         $controller = $kernel->dispatch(new Route('spy', 'index'));
 
@@ -45,7 +46,7 @@ final class CuboTest extends TestCase
     public function testDispatchEntregaARotaAoControlador(): void
     {
         $rota = new Route('spy', 'gridMenus', ['id' => '7']);
-        $kernel = new Cubo('Netflex', SpyController::class);
+        $kernel = new Cubo(self::APP_ROOT, SpyController::class);
 
         $controller = $kernel->dispatch($rota);
 
@@ -54,7 +55,7 @@ final class CuboTest extends TestCase
 
     public function testSemModuloRenderizaAPropriaView(): void
     {
-        $kernel = new Cubo('Netflex', SpyController::class);
+        $kernel = new Cubo(self::APP_ROOT, SpyController::class);
 
         $controller = $kernel->dispatch(new Route('spy', 'index'));
         $view = $controller->getView();
@@ -66,7 +67,7 @@ final class CuboTest extends TestCase
     public function testComModuloResolvidoRenderizaAViewDoModulo(): void
     {
         // O v1 fazia $core->getModule()->display(): quem renderiza e o MODULO.
-        $kernel = new Cubo('Netflex', CoreLikeController::class);
+        $kernel = new Cubo(self::APP_ROOT, CoreLikeController::class);
 
         $core = $kernel->dispatch(new Route('spy', 'index'));
         $modulo = $core->getModule();
@@ -79,7 +80,7 @@ final class CuboTest extends TestCase
 
     public function testSemMainControllerResolveOControladorPelaUrl(): void
     {
-        $kernel = new Cubo('Netflex', null, self::NS);
+        $kernel = new Cubo(self::APP_ROOT, null, self::NS);
 
         $controller = $kernel->dispatch(new Route('spy', 'index'));
 
@@ -88,7 +89,7 @@ final class CuboTest extends TestCase
 
     public function testMainControllerTemPrecedenciaSobreAUrl(): void
     {
-        $kernel = new Cubo('Netflex', SpyController::class, self::NS);
+        $kernel = new Cubo(self::APP_ROOT, SpyController::class, self::NS);
 
         // a rota aponta para 'coreLike', mas o main controller manda
         $controller = $kernel->dispatch(new Route('coreLike', 'index'));
@@ -98,7 +99,7 @@ final class CuboTest extends TestCase
 
     public function testControladorInexistenteLanca(): void
     {
-        $kernel = new Cubo('Netflex', null, self::NS);
+        $kernel = new Cubo(self::APP_ROOT, null, self::NS);
 
         $this->expectException(ControllerNotFoundException::class);
 
@@ -111,7 +112,7 @@ final class CuboTest extends TestCase
         // terminada em "Controller" que a URL nomeasse.
         $this->assertTrue(class_exists(ImpostorController::class));
 
-        $kernel = new Cubo('Netflex', null, self::NS);
+        $kernel = new Cubo(self::APP_ROOT, null, self::NS);
 
         $this->expectException(ControllerNotFoundException::class);
 
@@ -120,7 +121,7 @@ final class CuboTest extends TestCase
 
     public function testMainControllerQueNaoEUmControllerDoCuboLanca(): void
     {
-        $kernel = new Cubo('Netflex', ImpostorController::class);
+        $kernel = new Cubo(self::APP_ROOT, ImpostorController::class);
 
         $this->expectException(ControllerNotFoundException::class);
 

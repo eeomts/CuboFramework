@@ -27,12 +27,12 @@ class Config
     private array $_config = [];
 
     /**
-     * Nome da pasta do aplicativo principal (onde vive config/config.ini).
-     * Definido no boot via setAppFolder(); usado por _loadIniFile().
+     * Caminho ABSOLUTO da raiz do aplicativo (onde vive config/config.ini).
+     * Definido no boot via setAppRoot(); usado por _loadIniFile().
      *
-     * @var string|null $_appFolder
+     * @var string|null $_appRoot
      */
-    private ?string $_appFolder = null;
+    private ?string $_appRoot = null;
 
     private function __construct() {}
 
@@ -74,7 +74,7 @@ class Config
             define('CUBO_ROOT', dirname(__FILE__) . DIRECTORY_SEPARATOR);
 
         if (!defined("CUBO_RAIZ"))
-            define('CUBO_RAIZ', dirname(dirname(dirname(CUBO_ROOT))) . DIRECTORY_SEPARATOR);
+            define('CUBO_RAIZ', $this->getAppRoot() . DIRECTORY_SEPARATOR);
     }
 
 
@@ -99,38 +99,37 @@ class Config
     }
 
     /**
-     * Informa ao framework a pasta do aplicativo principal.
-     * Deve ser chamado no boot, antes de initializeConfig().
+     * Informa a raiz do aplicativo. Chamar no boot, antes de initializeConfig().
      *
-     * @param string $name nome da pasta (ex.: 'Cms', 'Ead')
+     * @param string $path caminho absoluto (ex.: __DIR__)
      */
-    public function setAppFolder(string $name): void
+    public function setAppRoot(string $path): void
     {
-        $this->_appFolder = $name;
+        $this->_appRoot = rtrim($path, '/\\');
     }
 
     /**
-     * Retorna a pasta onde o aplicativo principal esta sendo executado.
+     * Retorna a raiz absoluta do aplicativo.
      *
-     * Substitui Cubo::getAppFoldeRoot() -- a posse migrou do kernel para o
-     * Config, que passa a ser auto-suficiente para achar seu config.ini.
-     *
-     * @throws \RuntimeException se a pasta nao foi definida via setAppFolder()
+     * @throws \RuntimeException se a raiz nao foi definida via setAppRoot()
      */
-    public function getAppFolderRoot(): string
+    public function getAppRoot(): string
     {
-        if ($this->_appFolder === null) {
-            throw new \RuntimeException('Pasta da app nao definida; chame setAppFolder() antes.');
+        if ($this->_appRoot === null) {
+            throw new \RuntimeException('Raiz da app nao definida; chame setAppRoot() antes.');
         }
-        return $this->_appFolder;
+        return $this->_appRoot;
     }
 
     private function _loadIniFile(): void
     {
-        $iniPath = dirname(__FILE__, 3)
-            . DIRECTORY_SEPARATOR . $this->getAppFolderRoot()
+        $iniPath = $this->getAppRoot()
             . DIRECTORY_SEPARATOR . 'config'
             . DIRECTORY_SEPARATOR . 'config.ini';
+
+        if (!is_file($iniPath)) {
+            throw new \Cubo\Exceptions\CuboException("config.ini nao encontrado em: {$iniPath}");
+        }
 
         #lê o arquivo
         $ini = parse_ini_file($iniPath, true);
