@@ -21,8 +21,15 @@ class Router
      * @param SegmentMapper $mapper diz o que os segmentos de cabeca significam.
      *                              Sem argumento, vale o padrao controlador/acao.
      */
+    /**
+     * @param SegmentMapper $mapper diz o que os segmentos de cabeca significam.
+     *                              Sem argumento, vale o padrao controlador/acao.
+     * @param string|null $basePath subpasta onde a app esta montada ('/app/').
+     *                              Nulo tira do host declarado no config.ini.
+     */
     public function __construct(
-        private SegmentMapper $mapper = new ControllerActionMapper()
+        private SegmentMapper $mapper = new ControllerActionMapper(),
+        private ?string $basePath = null,
     ) {}
 
     /**
@@ -31,16 +38,9 @@ class Router
      */
     public function parseUrl(): Route
     {
-        // request = SERVER_NAME + REQUEST_URI menos o dominio do framework
-        $request = str_replace(
-            CUBO_DIR_NAME,
-            '',
-            $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI']
-        );
-
         // cada segmento vira camelCase (ex: grid-menus -> gridMenus)
         $parsed = [];
-        foreach (explode('/', $request) as $segment) {
+        foreach (explode('/', $this->requestPath()) as $segment) {
             $parsed[] = $this->toCamelCase($segment);
         }
 
@@ -54,6 +54,36 @@ class Router
             $rawParams,
             $head->module
         );
+    }
+
+    /**
+     * Caminho da requisicao sem a subpasta de montagem e sem query string.
+     * O dominio nao participa: rota e caminho, nao host.
+     */
+    private function requestPath(): string
+    {
+        $uri = (string) ($_SERVER['REQUEST_URI'] ?? '/');
+        $path = (string) (parse_url($uri, PHP_URL_PATH) ?: '/');
+
+        $base = rtrim($this->resolveBasePath(), '/') . '/';
+        $normalizado = rtrim($path, '/') . '/';
+
+        if (str_starts_with($normalizado, $base)) {
+            $path = substr($normalizado, strlen($base));
+        }
+
+        return trim($path, '/');
+    }
+
+    private function resolveBasePath(): string
+    {
+        if ($this->basePath !== null) {
+            return $this->basePath;
+        }
+
+        $host = Config::getInstance()->getConfig('ini.cubo.host');
+
+        return is_string($host) ? (string) (parse_url($host, PHP_URL_PATH) ?: '/') : '/';
     }
 
     /**

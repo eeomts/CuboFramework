@@ -69,17 +69,13 @@ final class RouterTest extends TestCase
         $this->assertSame('index', $head->method);
     }
 
-    // --- parseUrl (le CUBO_DIR_NAME + $_SERVER: processo isolado) ---
+    // --- parseUrl (le $_SERVER['REQUEST_URI'] e o basePath injetado) ---
 
-    #[RunInSeparateProcess]
-    #[PreserveGlobalState(false)]
     public function testParseUrlMontaRotaComControllerMetodoEParams(): void
     {
-        define('CUBO_DIR_NAME', 'example.com/app/');
-        $_SERVER['SERVER_NAME'] = 'example.com';
         $_SERVER['REQUEST_URI'] = '/app/financeiro/grid-menus/id/5';
 
-        $route = (new Router())->parseUrl();
+        $route = (new Router(basePath: '/app/'))->parseUrl();
 
         $this->assertInstanceOf(Route::class, $route);
         $this->assertSame('financeiro', $route->controller);
@@ -90,33 +86,56 @@ final class RouterTest extends TestCase
         $this->assertFalse($route->temModulo());
     }
 
-    #[RunInSeparateProcess]
-    #[PreserveGlobalState(false)]
     public function testParseUrlUsaIndexQuandoUrlVazia(): void
     {
-        define('CUBO_DIR_NAME', 'example.com/app/');
-        $_SERVER['SERVER_NAME'] = 'example.com';
         $_SERVER['REQUEST_URI'] = '/app/';
 
-        $route = (new Router())->parseUrl();
+        $route = (new Router(basePath: '/app/'))->parseUrl();
 
         $this->assertSame('index', $route->controller);
         $this->assertSame('index', $route->method);
+    }
+
+    public function testAppNaRaizComPortaNaoVazaOHostParaDentroDaRota(): void
+    {
+        // regressao: o parse antigo subtraia o host de SERVER_NAME . REQUEST_URI,
+        // e SERVER_NAME vem sem a porta -- entao 'localhost' virava controlador
+        $_SERVER['REQUEST_URI'] = '/';
+
+        $route = (new Router(basePath: '/'))->parseUrl();
+
+        $this->assertSame('index', $route->controller);
+        $this->assertSame('index', $route->method);
+    }
+
+    public function testQueryStringNaoEntraNaRota(): void
+    {
+        $_SERVER['REQUEST_URI'] = '/app/financeiro/grid-menus?busca=x&pagina=2';
+
+        $route = (new Router(basePath: '/app/'))->parseUrl();
+
+        $this->assertSame('financeiro', $route->controller);
+        $this->assertSame('gridMenus', $route->method);
+    }
+
+    public function testBasePathSemBarraFinalTambemCasa(): void
+    {
+        $_SERVER['REQUEST_URI'] = '/app';
+
+        $route = (new Router(basePath: '/app'))->parseUrl();
+
+        $this->assertSame('index', $route->controller);
     }
 
     /**
      * O mapper decide o significado E onde os parametros comecam: com modulo,
      * o par id/7 esta no indice 3, nao no 2.
      */
-    #[RunInSeparateProcess]
-    #[PreserveGlobalState(false)]
     public function testParseUrlComMapperDeModuloLeTresSegmentos(): void
     {
-        define('CUBO_DIR_NAME', 'example.com/app/');
-        $_SERVER['SERVER_NAME'] = 'example.com';
         $_SERVER['REQUEST_URI'] = '/app/produtividade/tarefa/minhas/id/7';
 
-        $route = (new Router(new ModuleFeatureActionMapper()))->parseUrl();
+        $route = (new Router(new ModuleFeatureActionMapper(), '/app/'))->parseUrl();
 
         $this->assertSame('produtividade', $route->module);
         $this->assertSame('tarefa', $route->controller);
@@ -128,15 +147,11 @@ final class RouterTest extends TestCase
     /**
      * __CONTROLLER__ e __ACTION__ eram definidas como efeito colateral do parseUrl.
      */
-    #[RunInSeparateProcess]
-    #[PreserveGlobalState(false)]
     public function testParseUrlNaoDefineMaisConstantesGlobais(): void
     {
-        define('CUBO_DIR_NAME', 'example.com/app/');
-        $_SERVER['SERVER_NAME'] = 'example.com';
         $_SERVER['REQUEST_URI'] = '/app/financeiro/grid-menus';
 
-        (new Router())->parseUrl();
+        (new Router(basePath: '/app/'))->parseUrl();
 
         $this->assertFalse(defined('__CONTROLLER__'));
         $this->assertFalse(defined('__ACTION__'));
