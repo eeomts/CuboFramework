@@ -13,6 +13,11 @@ class StorageException extends CuboException
     public const CODE_WRITE_FAILED = 109;
     public const CODE_UPLOAD_FAILED = 110;
 
+    public static function for(string $message): self
+    {
+        return new self($message, self::CODE_WRITE_FAILED);
+    }
+
     public static function writeFailed(string $storedName): self
     {
         return new self("Falha ao gravar o arquivo '{$storedName}'.", self::CODE_WRITE_FAILED);

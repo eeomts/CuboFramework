@@ -2,40 +2,47 @@
 
 namespace Cubo\Console;
 
+use Cubo\Console\Commands\BuildCommand;
 use Cubo\Console\Commands\HelpCommand;
+use Cubo\Console\Commands\InitCommand;
 use Cubo\Console\Commands\VersionCommand;
 use Cubo\Exceptions\CommandNotFoundException;
 
 final class CommandRegistry
 {
-    /** @var array<string,class-string<Command>> */
+    /** @var array<string,class-string<Command>|Command> */
     private array $commands = [];
 
     /**
-     * @param list<class-string<Command>> $commands
+     * @param list<class-string<Command>|Command> $commands
      */
     public function __construct(array $commands = [])
     {
-        foreach ($commands as $class) {
-            $this->add($class);
+        foreach ($commands as $command) {
+            $this->add($command);
         }
     }
 
     /** Os comandos que acompanham o framework. */
-    public static function default(): self
+    public static function default(?Paths $paths = null): self
     {
+        $paths ??= Paths::detect();
+
         return new self([
             HelpCommand::class,
             VersionCommand::class,
+            new BuildCommand($paths),
+            new InitCommand($paths),
         ]);
     }
 
     /**
-     * @param class-string<Command> $class
+     * @param class-string<Command>|Command $command classe (instanciada na hora)
+     *                                               ou instancia ja pronta
      */
-    public function add(string $class): void
+    public function add(string|Command $command): void
     {
-        $this->commands[$class::name()] = $class;
+        $this->commands[$command::name()] = $command;
     }
 
     public function has(string $name): bool
@@ -52,9 +59,9 @@ final class CommandRegistry
             throw CommandNotFoundException::for($name);
         }
 
-        $class = $this->commands[$name];
+        $command = $this->commands[$name];
 
-        return new $class();
+        return $command instanceof Command ? $command : new $command();
     }
 
     /**

@@ -1,0 +1,11 @@
+*.log
+*.tmp
+Thumbs.db
+desktop.ini
+
+storage/logs/*
+!storage/logs/.gitkeep
+public/uploads/*
+!public/uploads/.gitkeep
+
+config/config.local.ini
