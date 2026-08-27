@@ -131,28 +131,30 @@ class Config
             throw new \Cubo\Exceptions\CuboException("config.ini nao encontrado em: {$iniPath}");
         }
 
-        #lê o arquivo
         $ini = parse_ini_file($iniPath, true);
 
+        if ($ini === false) {
+            throw new \Cubo\Exceptions\CuboException("config.ini invalido: {$iniPath}");
+        }
 
-        $location = $ini['cubo']['location'];
-        // $host = $ini['cubo']['host.' . $location];
+        $location = $ini['cubo']['location'] ?? 'local';
 
         $cubo = [
-            'host'  => $ini['cubo']['host.' . $location],
-            'envi'  => $ini['cubo']['enviroment'],
-            'table_prefix' => $ini['cubo']['table_prefix'],
-            'database_prefix' => $ini['cubo']['database_prefix'],
-            'path_prefix' => $ini['cubo']['path_prefix'],
-            'servidor' => $ini['cubo']['servidor'],
-            'redir' => $ini['cubo']['redir'],
-            'versao' => $ini['cubo']['versao'],
-            'url_login' => $ini['cubo']['url_login']
+            'host' => $ini['cubo']['host.' . $location] ?? '',
+            'envi' => $ini['cubo']['enviroment'] ?? '',
+            'table_prefix' => $ini['cubo']['table_prefix'] ?? '',
+            'database_prefix' => $ini['cubo']['database_prefix'] ?? '',
+            'path_prefix' => $ini['cubo']['path_prefix'] ?? '',
+            'servidor' => $ini['cubo']['servidor'] ?? '',
+            'redir' => $ini['cubo']['redir'] ?? '',
+            'versao' => $ini['cubo']['versao'] ?? '',
+            'url_login' => $ini['cubo']['url_login'] ?? '',
         ];
 
         $this->setConfig('ini', [
-            'cubo'     => $cubo,
-            'database' => $ini['database.' . $location],
+            'cubo' => $cubo,
+            'app' => $ini['app'] ?? [],
+            'database' => $ini['database.' . $location] ?? null,
         ]);
     }
 }

@@ -28,7 +28,7 @@ final class ViewTest extends TestCase
         // O resolveTemplate() consulta o Config (singleton). Troca-se a
         // instancia por uma limpa, apontando a raiz para os templates fixture.
         $config = (new ReflectionClass(Config::class))->newInstanceWithoutConstructor();
-        $config->setConfig('template_root', __DIR__ . '/../../Support/templates/');
+        $config->setConfig(View::TEMPLATE_ROOTS, [__DIR__ . '/../../Support/templates/']);
 
         $this->setConfigInstance($config);
     }

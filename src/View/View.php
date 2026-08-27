@@ -29,15 +29,8 @@ abstract class View implements Helper
 
     private string $_template = '';
 
-    /**
-     * Raizes de template, na ordem de precedencia herdada do v1: primeiro a do
-     * modulo, depois a do core, por fim a customizada do cliente.
-     */
-    private const TEMPLATE_ROOTS = [
-        'template_root',
-        'core_template_root',
-        'custom_template_root',
-    ];
+    /** Chave de config com as raizes de template, na ordem de precedencia. */
+    public const TEMPLATE_ROOTS = 'template_roots';
 
     /**
      * Adiciona uma View filha. Aceita a instancia ou o nome da classe.
@@ -206,12 +199,10 @@ abstract class View implements Helper
             return null;
         }
 
-        $config = Config::getInstance();
+        $roots = Config::getInstance()->getConfig(self::TEMPLATE_ROOTS);
         $procuradas = [];
 
-        foreach (self::TEMPLATE_ROOTS as $chave) {
-            $root = $config->getConfig($chave);
-
+        foreach ((array) $roots as $root) {
             if (!is_string($root) || $root === '') {
                 continue;
             }

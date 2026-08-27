@@ -63,6 +63,8 @@ final class Cubo
         $config = Config::getInstance();
         $config->setAppRoot($this->appRoot);
         $config->initializeConfig();
+
+        (new Bootstrapper($config, $config->getAppRoot()))->boot();
     }
 
     /**
@@ -96,12 +98,24 @@ final class Cubo
     private function resolveController(Route $route): Controller
     {
         $class = $this->mainController
-            ?? $this->controllerNamespace . ucfirst($route->controller) . 'Controller';
+            ?? $this->controllerNamespace() . ucfirst($route->controller) . 'Controller';
 
         if (!class_exists($class) || !is_subclass_of($class, Controller::class)) {
             throw ControllerNotFoundException::for($class);
         }
 
         return new $class($route);
+    }
+
+    /** O construtor vence; sem ele, vale o [app] controllers do config.ini. */
+    private function controllerNamespace(): string
+    {
+        if ($this->controllerNamespace !== '') {
+            return $this->controllerNamespace;
+        }
+
+        $declared = Config::getInstance()->getConfig('ini.app.controllers');
+
+        return is_string($declared) ? $declared : '';
     }
 }
