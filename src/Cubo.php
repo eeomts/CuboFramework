@@ -20,6 +20,8 @@ use Cubo\Routing\Router;
  */
 final class Cubo
 {
+    public const VERSION = '2.1.0-dev';
+
     /**
      * @param string $appRoot Caminho ABSOLUTO da raiz da aplicacao, onde vive
      *                          config/config.ini. O index.php passa __DIR__.
