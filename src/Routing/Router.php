@@ -104,7 +104,6 @@ class Router
             $key = strtolower($segments[$i]);
             $value = $segments[$i + 1] ?? '';
 
-            // quirk do v1: chave repetida concatena os valores com '_'
             if (isset($params[$key])) {
                 $params[$key] .= "_{$value}";
             } else {
@@ -118,12 +117,9 @@ class Router
     /**
      * Transforma um path de metodo em camelCase, preservando o controlador.
      * ex: grid-menus-filho -> gridMenusFilho ; ctrl/grid-menus -> Ctrl/gridMenus
-     *
-     * Usado na permissao de menus por usuario.
      */
     public function transformMethod(string $value): string
     {
-        // se vier "controlador/metodo", so o controlador recebe ucfirst
         $parts = explode('/', $value);
         if (count($parts) > 1) {
             $value = ucfirst($parts[0]) . '/' . $parts[1];
@@ -134,7 +130,6 @@ class Router
 
     /**
      * Nome do modulo da rota, em Title Case.
-     * Lia a global __CONTROLLER__; agora recebe a rota.
      *
      * @param Route $route rota de onde sai o nome (modulo, ou controlador sem modulo)
      */

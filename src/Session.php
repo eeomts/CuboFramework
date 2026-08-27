@@ -37,35 +37,7 @@ class Session
      * Inicia a sessao se ainda nao houver uma ativa.
      *
      * v1 passava um $index para session_start(), que na verdade espera um array
-     * de options -> parametro removido. O teste isset($_SESSION) do v1 tambem era
-     * fraco; aqui usamos session_status().
-     */
-    public function start(): void
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-    }
-
-    /**
-     * Destroi completamente a sessao.
-     */
-    public function destroy(): bool
-    {
-        return session_destroy();
-    }
-
-    /**
-     * Grava um valor na sessao sob a chave de topo informada.
-     */
-    public function set(string $index, mixed $value): void
-    {
-        $_SESSION[$index] = $value;
-    }
-
-    /**
-     * Le um valor da sessao por caminho com ponto.
-     *
+     * de options -> parametro removido. O teste
      * @example get('login.nome') retorna $_SESSION['login']['nome']
      *
      * Substitui o getVar() do v1, que montava uma string e chamava eval(); agora
@@ -74,6 +46,27 @@ class Session
     public function get(string $index, mixed $default = ''): mixed
     {
         return Arr::get($_SESSION, $index, $default);
+    }
+
+    /**
+     * Registra um valor na sessao por caminho com ponto.
+     *
+     * @example set('login.nome', 'Pedro') faz $_SESSION['login']['nome'] = 'Pedro'
+     */
+    public function set(string $index, mixed $value): void
+    {
+        $keys = explode('.', $index);
+        $last = array_pop($keys);
+
+        $ref = &$_SESSION;
+        foreach ($keys as $key) {
+            if (!isset($ref[$key]) || !is_array($ref[$key])) {
+                $ref[$key] = [];
+            }
+            $ref = &$ref[$key];
+        }
+
+        $ref[$last] = $value;
     }
 
     /**
@@ -107,22 +100,3 @@ class Session
         unset($ref[$last]);
     }
 }
-
-/*
- * GUIA DE MIGRACAO - Cubo_Session -> Cubo\Session
- *
- * O acesso e por singleton: Session::getInstance()->metodo().
- *
- * RENOMEADOS
- *   startSession -> start
- *   endSession -> destroy
- *   addVar -> set
- *   getVar -> get
- *   getVars -> all
- *   destroyVars -> remove
- *
- * MUDOU
- *   start -- sem parametro
- *   get -- acesso aninhado por Arr::get($_SESSION, 'a.b'), sem eval
- *   remove -- unset por referencia, sem eval
- */

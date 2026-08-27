@@ -5,10 +5,6 @@ namespace Cubo\Tools;
 /**
  * Utilitários de manipulação de arrays.
  *
- * Segundo slice da explosão da God Class Cubo_Tools. Operações de array puras
- * e estáticas. Alguns métodos do v1 foram corrigidos ou substituídos; veja o
- * GUIA DE MIGRACAO no fim do arquivo.
- *
  * @package Cubo
  * @author v1: Cristiano (Cubo_Tools)
  * @author v2: Mateus - github.com/eeomts
@@ -16,9 +12,7 @@ namespace Cubo\Tools;
 final class Arr
 {
     /**
-     * Busca um valor aninhado por caminho com ponto. Substitui o antigo
-     * array_access(), que só montava a string "['a']['b']" (antipadrao ligado
-     * a eval/variaveis-variaveis) em vez de retornar o valor.
+     * Busca um valor aninhado por caminho com ponto.
      *
      * @example get(['a' => ['b' => 1]], 'a.b') retorna 1
      */
@@ -36,16 +30,7 @@ final class Arr
         return $value;
     }
 
-    /**
-     * Remove recursivamente as chaves numéricas, mantendo as associativas.
-     * (ex-removeIndexArray)
-     *
-     * Serve para limpar o resultado de mysql_fetch_array(MYSQL_BOTH), que trazia
-     * cada coluna duplicada em chave numérica E associativa. O v1 fazia isso via
-     * unset posicional ($array[$i]), frágil; aqui usamos a própria chave.
-     *
-     * Nota: tende a ficar obsoleto após o REFAC 6 (Eloquent não gera chave dupla).
-     */
+    /** Remove recursivamente as chaves numéricas, mantendo as associativas. */
     public static function stripNumericKeys(array $array): array
     {
         $result = [];
@@ -63,11 +48,7 @@ final class Arr
     }
 
     /**
-     * Remove linhas duplicadas com base nos valores de um conjunto de colunas.
-     * (ex-removeDuplicadosArray)
-     *
-     * Melhoria: usa a chave combinada como índice de um mapa (O(1) por linha),
-     * em vez do in_array O(n) do v1.
+     * Remove linhas duplicadas pelos valores de um conjunto de colunas.
      *
      * @param list<array<string, mixed>> $rows
      * @param list<string> $columns
@@ -94,25 +75,15 @@ final class Arr
     }
 
     /**
-     * Junta as posições capitalizadas numa única string PascalCase.
-     * (ex-captalizeArray, com o tipo corrigido)
-     *
-     * @example capitalizeJoin(['mateus', 'moreira']) retorna 'MateusMoreira'
-     *
      * @param list<string> $array
+     * @example capitalizeJoin(['mateus', 'moreira']) retorna 'MateusMoreira'
      */
     public static function capitalizeJoin(array $array): string
     {
         return implode('', array_map('ucfirst', $array));
     }
 
-    /**
-     * Verifica se um valor existe em um array de qualquer profundidade.
-     * (ex-in_array_r)
-     *
-     * Melhoria: genuinamente recursivo (o v1 só descia um nível). Mantém a
-     * comparação fezes (==) do original.
-     */
+    /** Busca em qualquer profundidade, com comparacao frouxa (==). */
     public static function containsRecursive(mixed $needle, array $haystack): bool
     {
         foreach ($haystack as $item) {
@@ -128,31 +99,9 @@ final class Arr
         return false;
     }
 
-    /**
-     * funcao pika, pra nao ter que digitar o viado do <pre>
-     * Imprime um valor formatado dentro de <pre> para depuração. (ex-printArray)
-     *
-     * O v1 dava exit (dump-and-die). Removido: dump apenas imprime.
-     * Se quiser encerrar, chame: Arr::dump($x); exit;
-     */
+    /** Imprime dentro de <pre> para depuracao; nao encerra a execucao. */
     public static function dump(mixed $value): void
     {
         echo '<pre>' . print_r($value, true) . '</pre>';
     }
 }
-
-/*
- * GUIA DE MIGRACAO - Cubo_Tools (array) -> Cubo\Tools\Arr
- *
- * RENOMEADOS
- *   removeDuplicadosArray -> dedupeBy
- *   captalizeArray -> capitalizeJoin
- *   in_array_r -> containsRecursive
- *   removeIndexArray -> stripNumericKeys
- *
- * MUDOU
- *   printArray -> dump -- sem exit; para encerrar use Arr::dump($a); exit;
- *
- * DESCARTADOS
- *   array_access X Arr::get($array, 'a.b')
- */

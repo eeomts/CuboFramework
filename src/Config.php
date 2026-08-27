@@ -19,26 +19,16 @@ class Config
 
     private static ?Config $_instance = null;
 
-    /**
-     * Variavel onde sera armazenada as configuracoes
-     * 
-     * @var array $_config
-     */
+    /** @var array */
     private array $_config = [];
 
-    /**
-     * Caminho ABSOLUTO da raiz do aplicativo (onde vive config/config.ini).
-     * Definido no boot via setAppRoot(); usado por _loadIniFile().
-     *
-     * @var string|null $_appRoot
-     */
+    /** @var string|null */
     private ?string $_appRoot = null;
 
     private function __construct() {}
 
     public static function getInstance(): static
     {
-
         if (static::$_instance === null) {
             static::$_instance = new static();
         }
@@ -47,8 +37,6 @@ class Config
 
     public function initializeConfig()
     {
-        // Carrega o config.ini antes de definir constantes que dependem dele
-        // (ex.: CUBO_DIR_NAME usa getConfig('ini.cubo.host')).
         $this->_loadIniFile();
 
         if (isset($_SERVER['HTTPS']))
@@ -65,11 +53,7 @@ class Config
         if (!defined("CUBO_DIR_NAME"))
             define('CUBO_DIR_NAME', str_replace($protocol . '://', '', $this->getConfig('ini.cubo.host')));
 
-        //Pasta raiz do framework
-        // DIRECTORY_SEPARATOR, nao DS: a constante DS e definida pelo index.php
-        // da APP, entao o framework dependia de um global que nao e dele. Era o
-        // debito registrado no REFAC 4, resolvido aqui tirando a dependencia (a
-        // app segue livre para definir DS para o codigo dela).
+        // DS e definido pelo index.php da APP, nao pelo framework.
         if (!defined("CUBO_ROOT"))
             define('CUBO_ROOT', dirname(__FILE__) . DIRECTORY_SEPARATOR);
 
@@ -98,21 +82,13 @@ class Config
         return $value;
     }
 
-    /**
-     * Informa a raiz do aplicativo. Chamar no boot, antes de initializeConfig().
-     *
-     * @param string $path caminho absoluto (ex.: __DIR__)
-     */
+    /** Chamar antes de initializeConfig(). */
     public function setAppRoot(string $path): void
     {
         $this->_appRoot = rtrim($path, '/\\');
     }
 
-    /**
-     * Retorna a raiz absoluta do aplicativo.
-     *
-     * @throws \RuntimeException se a raiz nao foi definida via setAppRoot()
-     */
+    /** @throws RuntimeException se nao foi setado via setAppRoot() */
     public function getAppRoot(): string
     {
         if ($this->_appRoot === null) {

@@ -5,10 +5,6 @@ namespace Cubo\Tools;
 /**
  * Utilitários numéricos: valor por extenso, formatação de moeda e de bytes.
  *
- * Terceiro slice da explosão da God Class Cubo_Tools. Consolida os dois métodos
- * "extenso" (que eram ~95% idênticos) num núcleo único e corrige bugs do v1;
- * veja o GUIA DE MIGRACAO no fim do arquivo.
- *
  * @package Cubo
  * @author v1: Cristiano (Cubo_Tools)
  * @author v2: Mateus - github.com/eeomts
@@ -16,13 +12,12 @@ namespace Cubo\Tools;
 final class Number
 {
     /**
-     * Valor monetário por extenso. (ex-extensoMoeda)
+     * Valor monetário por extenso.
      *
      * @example spellCurrency(1234.56) retorna 'um mil, duzentos e trinta e quatro reais e cinquenta e seis centavos'
      */
     public static function spellCurrency(float $valor, bool $upper = false): string
     {
-        
         return self::spell(
             $valor,
             ['centavo', 'real', 'mil', 'milhão', 'bilhão', 'trilhão', 'quatrilhão'],
@@ -32,7 +27,7 @@ final class Number
     }
 
     /**
-     * Número por extenso (sem rótulo de moeda). (ex-extensoNumero)
+     * Número por extenso, sem rótulo de moeda.
      *
      * @example spellNumber(1234) retorna 'um mil e duzentos e trinta e quatro'
      */
@@ -47,9 +42,7 @@ final class Number
     }
 
     /**
-     * Preenche a string até o tamanho dado. (ex-getNumZeros)
-     *
-     * @param string $pos 'L' esquerda, 'R' direita, 'B' ambos.
+     * @param string $pos 'L' esquerda, 'R' direita, 'B' ambos
      */
     public static function pad(string $value, int $length, string $char = '0', string $pos = 'L'): string
     {
@@ -61,8 +54,7 @@ final class Number
     }
 
     /**
-     * Converte uma string monetária BR para o formato de máquina. (ex-formatMoney)
-     * Remove o separador de milhar e troca o decimal por ponto.
+     * String monetária BR para o formato de máquina.
      *
      * @example formatMoney('1.234,56') retorna '1234.56'
      */
@@ -76,8 +68,6 @@ final class Number
     }
 
     /**
-     * Faz o parse de uma string monetária BR para float. (substitui validaCampoValue)
-     *
      * @example parseMoney('1.234,56') retorna 1234.56
      */
     public static function parseMoney(string $value): float
@@ -86,12 +76,6 @@ final class Number
     }
 
     /**
-     * Formata um tamanho em bytes de forma legível. (ex-getFormatSize, corrigido)
-     *
-     * O v1 estava bugado: só dividia com `$size > 1024` (perdendo o próprio 1024)
-     * e truncava com substr(strpos+3), gerando "102 B" para 1024. Aqui a divisão
-     * é feita corretamente e os zeros decimais à toa são removidos.
-     *
      * @example formatBytes(1536) retorna '1.5 KB'
      */
     public static function formatBytes(float $size, int $decimals = 2): string
@@ -113,10 +97,7 @@ final class Number
     # ------------------------------------------------------------------- PRIVATE
 
     /**
-     * Núcleo do "por extenso". O v1 tinha isto duplicado em extensoMoeda e
-     * extensoNumero, diferindo só nos rótulos singular/plural. Também corrige o
-     * modo maiúsculas: o v1 usava preg_replace(" E ", ...) sem delimitador (que
-     * retornava null); aqui é str_replace. O espaçamento é normalizado no fim.
+     * Nucleo compartilhado por spellCurrency e spellNumber; diferem so nos rotulos.
      *
      * @param list<string> $singular
      * @param list<string> $plural
@@ -177,20 +158,3 @@ final class Number
         return $upper ? str_replace(' E ', ' e ', ucwords($rt)) : $rt;
     }
 }
-
-/*
- * GUIA DE MIGRACAO - Cubo_Tools (numeros) -> Cubo\Tools\Number
- *
- * RENOMEADOS
- *   extensoMoeda -> spellCurrency
- *   extensoNumero -> spellNumber
- *   getNumZeros -> pad
- *   getFormatSize -> formatBytes
- *   formatMoney -> formatMoney
- *
- * MUDOU
- *   validaCampoValue -> parseMoney -- le valor no formato BR
- *
- * MOVIDOS
- *   transformMethod -> Cubo\Routing\Router
- */

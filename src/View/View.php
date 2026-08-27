@@ -229,26 +229,3 @@ abstract class View implements Helper
     {
     }
 }
-
-/*
- * GUIA DE MIGRACAO - Cubo_View -> Cubo\View\View
- *
- * MANTIDOS
- *   addParam / setTemplate / getParam / addChild / getChildren / getParams /
- *   updateParams / render
- *
- * NOVOS
- *   escape(string $param): string -- getParam com Security::escape (XSS na saida)
- *   getTemplate(): string
- *
- * MUDOU
- *   getParam(string, $default = null) -- tolera chave ausente
- *   addChild(View|string) -- valida a classe antes de instanciar
- *   _setDefaultParams() -- private para protected, da para sobrescrever
- *   template inexistente -- lanca TemplateNotFoundException, nao pagina em branco
- *   View implements Cubo\Helper -- render(): void agora e contrato
- *
- * DESCARTADOS
- *   removeChild / getChild / removeParam X sem substituto
- *   Cubo_Resource / Cubo_Resource_Interface X subsistema inteiro, sem versao v2
- */

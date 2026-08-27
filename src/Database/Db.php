@@ -1,14 +1,11 @@
 <?php
 
 /**
- * Objeto de acesso ao banco de dados.
- * Gerencia as conexoes e serve de porta para SQL cru.
+ * Acesso ao banco de dados; gerencia conexoes e SQL cru.
  *
  * @package Cubo
- * @author v1 Cristiano M. Gomes <cmgomes.es@gmail.com>
- *
- * V2 - core cubo atualizado para php 8+ (Doctrine 1 -> Eloquent)
- * @author Mateus - github.com/eeomts
+ * @author v1: Cristiano M. Gomes
+ * @author v2: Mateus - github.com/eeomts
  */
 
 namespace Cubo\Database;
@@ -159,35 +156,3 @@ class Db
         $this->getConnection()->disconnect();
     }
 }
-
-/*
- * GUIA DE MIGRACAO - Cubo_Db -> Cubo\Database\Db
- *
- * RENOMEADOS
- *   newConnection() sem argumentos -> connectFromConfig
- *   newConnection($config) + _connect -> addConnection
- *   getCurrentConnection -> getCurrentConnectionName
- *   getPDO -> getPdo
- *   getLastId / getLastInsertId -> getLastInsertId
- *
- * MANTIDOS
- *   changeConnection / getConnection / truncate / close
- *
- * MUDOU
- *   executeSql(string $sql, array $bindings = []) -- aceita bind e segue
- *     devolvendo PDOStatement
- *   changeConnection -- lanca se o nome nao existir
- *   truncate(string $table) -- recebia um Model
- *   prefixo de tabela -- chave 'prefix' da conexao (era setPrefix / getPrefix /
- *     setTablePrefix)
- *
- * MOVIDOS
- *   searchById -> Model::findById
- *   salve -> $model->save()
- *   delete -> $model->delete()
- *
- * DESCARTADOS
- *   CreateQuery X query builder do Eloquent: Cliente::where('nome', $n)->get()
- *   createTable X schema virou responsabilidade de migration/DDL
- *   getTable / execute X sem substituto
- */

@@ -10,27 +10,13 @@ use RecursiveIteratorIterator;
 /**
  * Utilitários de sistema de arquivos.
  *
- * Parte da explosão da God Class Cubo_Tools. Reúne o que sobrou de IO em disco
- * que não cabia nas classes de string/número. A formatação de bytes em texto
- * legível (ex-getFormatSize) já vive em Number::formatBytes.
- *
  * @package Cubo
  * @author v1: Cristiano (Cubo_Tools)
  * @author v2: Mateus - github.com/eeomts
  */
 final class Filesystem
 {
-    /**
-     * Consumo em disco (em bytes) de um diretório, somando recursivamente todos
-     * os arquivos. (ex-getSizeFolder)
-     *
-     * O v1 recursava com $this->getSizeFolder() dentro de um método static, o
-     * que e fatal no PHP 8. Aqui a varredura usa RecursiveIteratorIterator, sem
-     * recursao manual.
-     *
-     * @param string $path Caminho do diretório.
-     * @return int Total em bytes; 0 se o caminho não existir ou não for pasta.
-     */
+    /** Consumo em disco, em bytes; 0 se o caminho nao existir ou nao for pasta. */
     public static function getSizeFolder(string $path): int
     {
         if (!is_dir($path)) {
@@ -85,9 +71,7 @@ final class Filesystem
         }
     }
 
-    /**
-     * Apaga uma pasta e todo o conteudo. Caminho inexistente e no-op.
-     */
+    /** Apaga a pasta e todo o conteudo. Caminho inexistente e no-op. */
     public static function removeDirectory(string $path): void
     {
         if (!is_dir($path)) {
@@ -130,17 +114,3 @@ final class Filesystem
         return !(new FilesystemIterator($path, FilesystemIterator::SKIP_DOTS))->valid();
     }
 }
-
-/*
- * GUIA DE MIGRACAO - Cubo_Tools (filesystem) -> Cubo\Tools\Filesystem
- *
- * MUDOU
- *   getSizeFolder -- retorno tipado int; pasta inexistente devolve 0
- *
- * MOVIDOS
- *   getFormatSize -> Cubo\Tools\Number::formatBytes
- *   prepareSearch -> Cubo\Database\Search\SearchCriteria
- *
- * DESCARTADOS
- *   readyXlsx X sem substituto
- */

@@ -11,13 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 
-/**
- * Esconde de TODA query os registros com a flag `deleted` ligada.
- *
- * E o coracao do soft delete do Cubo v2: aplicado uma vez no boot do Model,
- * passa a valer em find(), get(), first(), relacionamentos e agregacoes --
- * sem que nenhum caller precise lembrar de filtrar.
- */
+/** Aplica deletedão implícita em TODA query por flag `deleted`. */
 class NotDeletedScope implements Scope
 {
     public function apply(Builder $builder, Model $model): void

@@ -2,13 +2,10 @@
 
 /**
  * Modelo base do sistema.
- * Todo model da aplicacao estende esta classe.
  *
  * @package Cubo
- * @author v1 Cristiano
- *
- * V2 - core cubo atualizado para php 8+ (Doctrine_Record -> Eloquent)
- * @author Mateus - github.com/eeomts
+ * @author v1: Cristiano
+ * @author v2: Mateus - github.com/eeomts
  */
 
 namespace Cubo\Database;
@@ -107,26 +104,3 @@ abstract class Model extends EloquentModel implements Stringable
         return static::class . "[{$this->getKey()}]";
     }
 }
-
-/*
- * GUIA DE MIGRACAO - Cubo_Model -> Cubo\Database\Model
- *
- * RENOMEADOS
- *   to_string -> __toString
- *   Cubo_Db::searchById -> findById
- *   Cubo_Tools::getColumnModel -> getColumnModel
- *   Cubo_Tools::prepareSearch -> scopeSearch, sobre SearchCriteria
- *
- * MUDOU
- *   getRecords -- agora estatico
- *   colunas -- expostas como propriedades ($cliente->nome), no lugar dos
- *     getters/setters coluna a coluna; getId() vira ->id ou ->getKey()
- *   created / updated -- preenchidos pelo ORM
- *   getDeleted / setDeleted -- viram trashed() / delete() / restore()
- *
- * DESCARTADOS
- *   setTableDefinition X o Eloquent inspeciona a tabela; sobram $table,
- *     $fillable e $casts
- *   setUp X relacionamentos viram metodos do Eloquent (belongsTo / hasOne /
- *     hasMany / belongsToMany)
- */

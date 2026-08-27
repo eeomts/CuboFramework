@@ -11,19 +11,10 @@ use Cubo\Database\Scopes\NotDeletedScope;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Soft delete por FLAG inteira: a coluna `deleted` tinyint 0/1, convencao de
- * schema do Cubo (ver Cubo\Database\Model).
+ * Soft delete por FLAG: coluna `deleted` tinyint 0/1 (convencao de schema).
  *
- * Por que nao usar o trait SoftDeletes do proprio Eloquent: ele exige uma coluna
- * `deleted_at` TIMESTAMP NULL e marca a data da exclusao.
- *
- * Ganho de design sobre o v1: la o soft delete era manual e ESPALHADO --
- * Cubo_Db::delete() ligava a flag, Cubo_Db::searchById() testava
- * `deleted == 1 ? null : $data`, e qualquer outra consulta precisava lembrar
- * de filtrar `deleted = 0` na mao (quem esquecia, trazia registro excluido).
- * Aqui a regra mora em UM lugar (NotDeletedScope) e se aplica sozinha.
- *
- * O Model pode trocar o nome da coluna com `const DELETED = 'outra_coluna';`
+ * Diferente do SoftDeletes do Eloquent que exige timestamp deleted_at.
+ * A regra mora em NotDeletedScope e se aplica sozinha em toda query.
  */
 trait SoftDeleteFlag
 {

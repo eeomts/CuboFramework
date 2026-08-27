@@ -5,15 +5,7 @@ namespace Cubo;
 use Cubo\Logging\LoggerInterface;
 
 /**
- * Responsável por reagir a exceções não tratadas: registra em log e encaminha
- * o usuário para a página de erro padrão.
- *
- * No v1 essa lógica morava dentro do Cubo_ErrorManager::errorHandler() — ou
- * seja, a própria exceção sabia logar, mandar header HTTP e dar exit. Aqui a
- * responsabilidade foi extraída em três: as exceções (\Cubo\Exceptions\*) só
- * carregam dados; o {@see LoggerInterface} escreve o log; este handler apenas
- * orquestra (formata a exceção → loga → redireciona). SRP + inversão de
- * dependência, e o formato fica testável isoladamente ({@see format()}).
+ * Registra e encaminha exceções não tratadas.
  *
  * @package Cubo
  * @author v1: João (Cubo_ErrorManager::errorHandler)
@@ -22,18 +14,15 @@ use Cubo\Logging\LoggerInterface;
 final class ErrorHandler
 {
     /**
-     * @param LoggerInterface $logger Destino do log (arquivo, stderr, Monolog...).
-     * @param string          $host   Host base para montar a URL da página de erro.
+     * @param LoggerInterface $logger destino do log (arquivo, stderr, Monolog...)
+     * @param string $host host base para montar a URL da pagina de erro
      */
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly string $host,
     ) {}
 
-    /**
-     * Registra este handler como tratador global de exceções não capturadas.
-     * Substitui o try/catch de topo do index.php.
-     */
+    /** Registra como tratador global de excecoes nao capturadas. 
     public function register(): void
     {
         set_exception_handler($this->handle(...));

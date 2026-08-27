@@ -41,23 +41,14 @@ final class Cubo
     ) {
     }
 
-    /**
-     * Prepara o ambiente e despacha. Excecoes sobem: quem monta a resposta de
-     * erro e o index.php da app, com o Cubo\ErrorHandler.
-     */
+    /** Despacha a requisicao; excecoes sobem para o index.php da app. */
     public function run(): void
     {
         $this->bootstrap();
         $this->dispatch($this->router->parseUrl());
     }
 
-    /**
-     * Configuracao do framework, e nada mais.
-     *
-     * Fora daqui de proposito: o autoload (Composer, carregado pelo index.php da
-     * app) e o wiring de classes da APP -- View padrao e repositorio de chaves --
-     * que o framework nao pode nomear. Ver o guia no rodape.
-     */
+    /** Configuracao do framework somente. */
     public function bootstrap(): void
     {
         $config = Config::getInstance();
@@ -67,12 +58,7 @@ final class Cubo
         (new Bootstrapper($config, $config->getAppRoot()))->boot();
     }
 
-    /**
-     * Instancia o controlador da rota, roda o ciclo e renderiza.
-     *
-     * Caminho unico para os dois casos: getModule() devolve $this quando nao ha
-     * modulo resolvido.
-     */
+    /** Instancia, roda e renderiza o controlador. */
     public function dispatch(Route $route): Controller
     {
         $controller = $this->resolveController($route);
@@ -87,14 +73,7 @@ final class Cubo
         return $controller;
     }
 
-    /**
-     * Descobre e instancia o controlador que atende a rota.
-     *
-     * Exige um Cubo\Controller: sem isso, quem monta a URL escolheria qual classe
-     * o framework instancia.
-     *
-     * @throws ControllerNotFoundException
-     */
+    /** @throws ControllerNotFoundException */
     private function resolveController(Route $route): Controller
     {
         $class = $this->mainController
@@ -107,7 +86,7 @@ final class Cubo
         return new $class($route);
     }
 
-    /** O construtor vence; sem ele, vale o [app] controllers do config.ini. */
+    /** Construtor leva precedencia sobre o [app] controllers do config.ini. */
     private function controllerNamespace(): string
     {
         if ($this->controllerNamespace !== '') {

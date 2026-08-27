@@ -178,25 +178,3 @@ final class Cors
         return is_string($host) && $host !== '' ? strtolower($host) : null;
     }
 }
-
-/*
- * GUIA DE MIGRACAO - Cubo_Auth::enableCORS() -> Cubo\Http\Cors
- *
- * RENOMEADO
- *   enableCORS -> headersFor / preflightHeadersFor / send
- *
- * NOVOS
- *   allows(?string $origin): bool
- *   allowsAnyOrigin(): bool
- *   isPreflight(array $server): bool
- *
- * MUDOU
- *   Allow-Origin -- so sai se a origem bater no url_access da chave; origem
- *     negada devolve [] e o navegador bloqueia a leitura
- *   Allow-Credentials -- false por padrao
- *   Vary: Origin -- passa a ser emitido
- *   comparacao do host -- host exato ou subdominio, nao mais regex
- *
- * DESCARTADO
- *   exit(0) no preflight X quem chama decide encerrar
- */

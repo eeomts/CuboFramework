@@ -5,22 +5,13 @@ namespace Cubo\Tools;
 /**
  * Validação e formatação de documentos brasileiros (CPF e CNPJ).
  *
- * Quarta parte da explosão da God Class Cubo_Tools.
- * O v1 juntava CPF e CNPJ num único validaCPFCNPJ($s, $tipopessoa);
- * agora aqui cada documento tem seu método. 
- * Além disso o ramo de CNPJ do v1 QUEBRAVA no PHP 8 (TypeError: soma
- * iniciada como string ""); foi reescrito com o algoritmo padrão. 
- * Veja o GUIA DE MIGRACAO no fim do arquivo.
- *
  * @package Cubo
  * @author v1: Cristiano (Cubo_Tools)
  * @author v2: Mateus - github.com/eeomts
  */
 final class Docs
 {
-    /**
-     * Valida um CPF (aceita com ou sem máscara). (ex-validaCPFCNPJ tipo 1)
-     */
+    /** Aceita com ou sem máscara. */
     public static function isCpf(string $cpf): bool
     {
         $cpf = self::onlyDigits($cpf);
@@ -42,9 +33,7 @@ final class Docs
         return true;
     }
 
-    /**
-     * Valida um CNPJ (aceita com ou sem máscara). (ex-validaCPFCNPJ tipo 2)
-     */
+    /** Aceita com ou sem máscara. */
     public static function isCnpj(string $cnpj): bool
     {
         $cnpj = self::onlyDigits($cnpj);
@@ -69,9 +58,7 @@ final class Docs
         return true;
     }
 
-    /**
-     * Valida CPF ou CNPJ detectando pelo número de dígitos.
-     */
+    /** Valida CPF ou CNPJ detectando pelo numero de digitos. */
     public static function isValid(string $doc): bool
     {
         return match (strlen(self::onlyDigits($doc))) {
@@ -81,11 +68,7 @@ final class Docs
         };
     }
 
-    /**
-     * Formata um documento pela quantidade de dígitos. (ex-formatarCpfCnpj)
-     * CPF: 000.000.000-00  |  CNPJ: 00.000.000/0000-00
-     * Documentos com outro tamanho voltam só com os dígitos.
-     */
+    /** CPF 000.000.000-00, CNPJ 00.000.000/0000-00; outro tamanho volta so digitos. */
     public static function format(string $doc): string
     {
         $doc = self::onlyDigits($doc);
@@ -111,18 +94,3 @@ final class Docs
         return $resto < 2 ? 0 : 11 - $resto;
     }
 }
-
-/*
- * GUIA DE MIGRACAO - Cubo_Tools (docs) -> Cubo\Tools\Docs
- *
- * SEPARADOS
- *   validaCPFCNPJ($s, 1) -> isCpf
- *   validaCPFCNPJ($s, 2) -> isCnpj
- *   formatarCpfCnpj -> format
- *
- * NOVOS
- *   isValid -- detecta CPF ou CNPJ pelo tamanho
- *
- * MOVIDOS
- *   geraPass -> Cubo\Security::randomPassword
- */

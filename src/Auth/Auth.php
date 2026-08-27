@@ -188,37 +188,3 @@ final class Auth
         return is_string($value) && trim($value) !== '' ? $value : null;
     }
 }
-
-/*
- * GUIA DE MIGRACAO - Cubo_Auth -> Cubo\Auth\Auth
- *
- * RENOMEADOS
- *   getResponse -> isAuthorized(): bool
- *   check -> authenticate(array $headers, array $server)
- *   checkHost -> refererAllowed, sobre Cors::allows
- *   enableCORS -> Cubo\Http\Cors
- *
- * NOVOS
- *   isPreflight(): bool -- quem chama decide encerrar a resposta
- *   ApiKeyRepository -- contrato de leitura das chaves, implementado pela app
- *   ApiKey / Credentials -- VOs de chave resolvida e de par app_id:app_secret
- *
- * MUDOU
- *   __construct(ApiKeyRepository, bool $allowCredentials) -- so dependencias,
- *     sem I/O; headers e $_SERVER entram por parametro do authenticate
- *   busca da chave -- bind pelo repositorio, nao concatenacao no SQL
- *   ordem -- resolve a chave ANTES de emitir os cabecalhos de CORS
- *   host permitido -- comparacao de host, nao regex
- *   mensagem de erro -- nao devolve mais o app_id/app_secret enviados
- *   header Authorization -- lido sem depender da caixa; segredo com ":" intacto
- *   getConta -- preenchido so quando autorizado
- *
- * MANTIDO
- *   ausencia de Referer NEGA o acesso, inclusive com url_access = '%'
- *
- * DESCARTADOS
- *   getallheaders X headers entram por parametro
- *   getDb X o acesso a dados virou ApiKeyRepository
- *   newConnection('contas') X o model ContaKeys ja declara a conexao
- *   exit(0) no preflight X ver isPreflight
- */

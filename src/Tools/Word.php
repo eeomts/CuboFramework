@@ -4,10 +4,9 @@ namespace Cubo\Tools;
 
 /**
  * Geração de documento Word a partir de HTML.
- *  O v1 usava a lib local HTML_TO_DOC, que NÃO gera .docx de verdade: é o truque "HTML como
- * Word" - embrulha o HTML num envelope com namespaces do Word e serve como .doc,
- * que o Word abre. Aqui a técnica foi reimplementada limpa e SEM dependência.
- * Veja o GUIA DE MIGRACAO no fim do arquivo.
+ *
+ * Gera HTML-como-Word (.doc), nao .docx OOXML: o HTML vai num envelope com os
+ * namespaces do Word, que o Word abre.
  *
  * @package Cubo
  * @author v1: Harish Chauhan (HTML_TO_DOC) / Cristiano (Cubo_Tools)
@@ -16,13 +15,7 @@ namespace Cubo\Tools;
 final class Word
 {
     /**
-     * Gera um documento Word (.doc) a partir de HTML. (ex-htmlToDoc)
-     *
-     * @param string $html - Conteúdo HTML (pode incluir <head>/<title>/<body>).
-     * @param string|null $filename Nome do arquivo (o .doc é acrescentado se faltar).
-     * @param string $dest - 'S' retorna a string, 'D' força download, 'F' grava arquivo.
-     *
-     * @return string O documento gerado (HTML no envelope do Word).
+     * @param string $dest 'S' retorna a string, 'D' forca download, 'F' grava arquivo
      */
     public static function fromHtml(string $html, ?string $filename = null, string $dest = 'D'): string
     {
@@ -48,9 +41,6 @@ final class Word
     # ------------------------------------------------------------------- PRIVATE
 
     /**
-     * Separa <head>, <title> e <body> do HTML de entrada, removendo DOCTYPE e
-     * <script>. (ex-HTML_TO_DOC::_parseHtml)
-     *
      * @return array{0: string, 1: string, 2: string} [head, body, title]
      */
     private static function parse(string $html): array
@@ -113,16 +103,3 @@ final class Word
         HTML;
     }
 }
-
-/*
- * GUIA DE MIGRACAO - Cubo_Tools (word) -> Cubo\Tools\Word
- *
- * RENOMEADO
- *   htmlToDoc -> fromHtml($html, $name, $dest = 'D')
- *
- * DEPENDENCIA REMOVIDA
- *   LIBS/doc/html_to_doc.inc.php X reimplementado inline, sem lib
- *
- * NOTA
- *   Gera HTML-como-Word (.doc), nao .docx OOXML.
- */

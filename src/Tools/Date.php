@@ -1,17 +1,11 @@
 <?php
 
 /**
- * Responsável por cuidar das datas, contém métodos para identificar e alterar a data enviada.
- * Esta classe trabalha com base em datas no formato mysql aaaa-mm-dd e no formato brasileiro dd/mm/aaaa podendo
- * conter o timestamp completo com H:i:s
- * 
+ * Datas em formato MySQL (aaaa-mm-dd) e brasileiro (dd/mm/aaaa), com ou sem H:i:s.
+ *
  * @package Cubo
- * @author Cristiano
- * 
- * updated by:
- * @author mateus - github.com/eeomts
- * @package Cubo
- * @updated at 14/06/26 19:19
+ * @author v1: Cristiano
+ * @author v2: Mateus - github.com/eeomts
  */
 
 namespace Cubo\Tools;
@@ -28,65 +22,25 @@ class Date
 	
 	private const FIXED_HOLIDAYS = ['01-01', '21-04', '01-05', '07-09', '12-10', '02-11', '15-11', '25-12'];
 
-	/**
-	 * @param string $formato - formato desejado para a data, padrao brasil
-	 * @return string 
-	 */
+	/** @param string $formato formato desejado; o padrao e o brasileiro */
 	public static function now(string $formato = 'd/m/Y H:i:s'): string
 	{
 		return (new \DateTimeImmutable())->format($formato);
 	}
 
-	/**
-	 * 
-	 * Adiciona valor a algum campo da data
-	 * Esta função pode ser utilizada para adicionar dias meses, anos...
-	 * 
-	 * @param integer $value a quantidade do que será adicionada
-	 * @param string $type determina o que será adicionada, pode ser:
-	 * "h" para horas
-	 * "i" para minutos
-	 * "s" para segundos
-	 * "m" para meses
-	 * "d" para dias
-	 * "Y" para anos
-	 * 
-	 * @return string 
-	 */
+	/** @param string $type h horas, i minutos, s segundos, d dias, m meses, Y anos */
 	public static function addTime(string $data, int $value, string $type): string
 	{
 		return self::parseDate($data)->add(self::interval($value, $type))->format('d/m/Y H:i:s');
 	}
 
-	/**
-	 * 
-	 * Remove valor a algum campo da data
-	 * Esta função pode ser utilizada para remover dias meses, anos...
-	 * 
-	 * @param integer $value a quantidade do que será removida
-	 * @param string $type determina o que será removida, pode ser:
-	 * "h" para horas
-	 * "i" para minutos
-	 * "s" para segundos
-	 * "m" para meses
-	 * "d" para dias
-	 * "Y" para anos
-	 * 
-	 * @return string
-	 */
+	/** @param string $type h horas, i minutos, s segundos, d dias, m meses, Y anos */
 	public static function removeTime(string $data, int $value, string $type): string
 	{
 		return self::parseDate($data)->sub(self::interval($value, $type))->format('d/m/Y H:i:s');
 	}
 
-	/**
-	 * Funcao para simplificar a vida
-	 * 
-	 * Recebe a data com qualquer formatação e retorna a mesma data no formato especificado
-	 * 
-	 * @param string $formato
-	 * @param string $data
-	 */
+	/** Recebe a data em qualquer formatação e devolve no formato pedido. */
 	public static function formataData(string $data, string $formato): string
 	{
 		return self::parseDate($data)->format($formato);
@@ -94,12 +48,7 @@ class Date
 
 
 	/**
-	 * Retorna a diferença entre duas datas.
-	 *
-	 * @param string $begin Data inicial em formato BR ou MySQL
-	 * @param string $end   Data final em formato BR ou MySQL
-	 * @param string $unit  Unidade de retorno: 'Y' anos, 'M' meses, 'D' dias, 'H' horas, 'I' minutos. Vazio retorna segundos.
-	 * @return int
+	 * @param string $unit 'Y' anos, 'M' meses, 'D' dias, 'H' horas, 'I' minutos; vazio devolve segundos
 	 */
 	public static function diff(string $begin, string $end, string $unit = ''): int
 	{
@@ -116,9 +65,8 @@ class Date
 	}
 
 	/**
-	 * Atalho de formatação com apelidos. (ex-convertData)
 	 * Apelidos: eng=Y-m-d, engh=Y-m-d H:i:s, br=d/m/Y, brh=d/m/Y H:i:s, bh=H:i, bhs=H:i:s.
-	 * Qualquer outro valor é tratado como formato literal do date().
+	 * Qualquer outro valor vale como formato literal do date().
 	 */
 	public static function convert(string $date, string $format): string
 	{
@@ -131,10 +79,7 @@ class Date
 		return self::formataData($date, $aliases[$format] ?? $format);
 	}
 
-	/**
-	 * Formata uma quantidade de segundos como duração HH:MM:SS. (ex-getHour)
-	 * Aceita horas acima de 24 (é duração, não hora do dia).
-	 */
+	/** Segundos como duração HH:MM:SS; aceita acima de 24h por ser duração. */
 	public static function formatDuration(int $seconds): string
 	{
 		$hours = intdiv($seconds, 3600);
@@ -145,10 +90,7 @@ class Date
 		return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
 	}
 
-	/**
-	 * Converte uma duração H:i:s em total de segundos. (ex-getTimestampHour)
-	 * Segundos ausentes são tratados como zero.
-	 */
+	/** Duração H:i:s em total de segundos; segundos ausentes contam como zero. */
 	public static function durationToSeconds(string $time): int
 	{
 		[$h, $m, $s] = array_pad(explode(':', $time), 3, 0);
@@ -167,9 +109,7 @@ class Date
 		return $return === 'hr' ? self::formatDuration($diff) : $diff;
 	}
 
-	/**
-	 * Soma de duas durações H:i:s. (ex-getSomaHour)
-	 */
+	/** Soma de duas durações H:i:s. */
 	public static function sumHours(string $start, string $end, string $return = 'hr'): string|int
 	{
 		$soma = self::durationToSeconds($start) + self::durationToSeconds($end);
@@ -178,8 +118,7 @@ class Date
 	}
 
 	/**
-	 * Data por extenso. (ex-extensoData)
-	 * $type 'dh' inclui " as HH:MM"; 'd' retorna só a data.
+	 * Data por extenso. $type 'dh' inclui " as HH:MM"; 'd' devolve só a data.
 	 *
 	 * @example spellDate('2026-01-05 15:30:00') => '05 de janeiro de 2026 as 15:30'
 	 */
@@ -192,18 +131,15 @@ class Date
 		return $type === 'dh' ? $extenso . ' as ' . date('H:i', $ts) : $extenso;
 	}
 
-	# Nome do mês pelo número (1-12). (ex-extensoMes) 
+	# Nome do mês pelo número (1-12).
 	public static function monthName(int $month): string
 	{
 		return self::MONTHS[$month] ?? '';
 	}
 
 	/**
-	 * Valida se uma string de data bate com um formato conhecido. (ex-validaData)
+	 * Valida a data, inclusive a existencia real do dia.
 	 * $type: en=Y-m-d H:i:s, br=d/m/Y H:i:s, -br=d/m/Y, -en=Y-m-d.
-	 *
-	 * Melhoria: usa createFromFormat, que valida também a data real (o regex do
-	 * v1 aceitava dias impossíveis como 2026-02-30). Retorna bool (v1 dava 1/0).
 	 */
 	public static function isValidFormat(string $date, string $type = 'en'): bool
 	{
@@ -221,9 +157,7 @@ class Date
 		return $dt !== false && $dt->format($formats[$type]) === $date;
 	}
 
-	/**
-	 * Converte um número de série de data do Excel em timestamp Unix. (ex-convertExcelDate)
-	 */
+	/** Número de série de data do Excel em timestamp Unix. */
 	public static function fromExcel(float $serial): int
 	{
 		$days = floor($serial);
@@ -233,12 +167,8 @@ class Date
 	}
 
 	/**
-	 * Ajusta um timestamp para o próximo dia útil (feriados nacionais, sábado e
-	 * domingo). (ex-verificaDataFDSF)
-	 *
-	 * @param bool $ajuste Quando true (padrão) devolve o timestamp do próximo dia
-	 *   útil. Quando false, apenas classifica: 'F' feriado, 'S' sábado, 'D'
-	 *   domingo, ou o próprio timestamp se já for dia útil.
+	 * @param bool $ajuste true devolve o timestamp do proximo dia util; false apenas
+	 *                     classifica em 'F' feriado, 'S' sabado, 'D' domingo
 	 */
 	public static function businessDay(int $timestamp, bool $ajuste = true): int|string
 	{
@@ -299,21 +229,10 @@ class Date
 	#PRIVATES
 
 	/**
-	 * parseDate
-	 * Parseia uma string de data para DateTimeImmutable.
-	 * Tenta os formatos BR e MySQL, com hora completa, com hora sem segundos e sem hora.
+	 * H:i sem segundos existe porque e o que o input type=time manda.
+	 * O `|` zera o que nao foi lido, senao a hora herda os segundos do relogio.
 	 *
-	 * A hora SEM segundos existe porque é o que um formulário manda: o campo de
-	 * data e o de hora são separados, e o input type=time devolve "H:i". Antes
-	 * essa combinação não casava em nenhum dos formatos e a data era recusada.
-	 *
-	 * O `|` zera o que não foi lido, então "01/08/2026 09:30" vira 09:30:00 e não
-	 * herda os segundos do relógio. Sobra no fim da string continua sendo recusada
-	 * pelo próprio createFromFormat.
-	 *
-	 * @param string $data
-	 * @return \DateTimeImmutable
-	 * @throws \InvalidArgumentException Se o formato não estiver no array
+	 * @throws \InvalidArgumentException se nenhum formato casar
 	 */
 	private static function parseDate(string $data): \DateTimeImmutable
 	{
@@ -351,18 +270,3 @@ class Date
 		};
 	}
 }
-
-/*
- * GUIA DE MIGRACAO - Cubo_Tools (datas) -> Cubo\Tools\Date
- *
- * RENOMEADOS
- *   convertData -> convert
- *   getHour -> formatDuration
- *   getTimestampHour -> durationToSeconds
- *   getDiffHour -> diffHours
- *   getSomaHour -> sumHours
- *   extensoData -> spellDate
- *   extensoMes -> monthName
- *   verificaDataFDSF -> businessDay
- *   convertExcelDate -> fromExcel
- */
