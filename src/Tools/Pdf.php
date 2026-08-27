@@ -133,7 +133,6 @@ final class Pdf
      */
     private static function makeMpdf(string $orientation, string $margins = '0,0,5,0'): Mpdf
     {
-        // o mpdf e opcional (suggest, nao require): 94MB que so esta classe usa
         if (!class_exists(Mpdf::class)) {
             throw MissingDependencyException::for('mpdf/mpdf', self::class);
         }
