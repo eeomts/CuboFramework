@@ -4,10 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= $view->escape('titulo', 'Cubo') ?></title>
-    <link rel="stylesheet" href="/assets/css/app.css">
+    <?= $view->assets('base') ?>
 </head>
 <body>
     <h1><?= $view->escape('titulo', 'Cubo') ?></h1>
     <p><?= $view->escape('mensagem') ?></p>
+    <?= $view->assets('scripts') ?>
 </body>
 </html>

@@ -6,6 +6,7 @@ use Cubo\Database\Db;
 use Cubo\Logging\FileLogger;
 use Cubo\Routing\RouteCollection;
 use Cubo\Routing\Router;
+use Cubo\View\Imports;
 use Cubo\View\View;
 
 /**
@@ -26,6 +27,7 @@ final class Bootstrapper
         $this->applyRuntime();
         $this->applyTemplateRoots();
         $this->applyRoutes();
+        $this->applyImports();
         $this->applyDefaultView();
         $this->applyErrorHandling();
         $this->applyDatabase();
@@ -68,6 +70,30 @@ final class Bootstrapper
         }
 
         $this->config->setConfig(Router::ROUTES, $rotas);
+    }
+
+    /**
+     * Monta o carregador de assets declarado em [app] imports.
+     *
+     * O caminho em disco serve para o filemtime da versao; a base vem do host
+     * do ini, para a app montada em subpasta gerar URL certa.
+     */
+    private function applyImports(): void
+    {
+        $arquivo = $this->string('imports');
+
+        if ($arquivo === '') {
+            return;
+        }
+
+        $host = (string) $this->config->getConfig('ini.cubo.host');
+        $base = (string) (parse_url($host, PHP_URL_PATH) ?: '/');
+
+        $this->config->setConfig(View::IMPORTS, new Imports(
+            arquivo: $this->absolutePath($arquivo, false),
+            publicRoot: $this->absolutePath('public', false),
+            basePath: $base,
+        ));
     }
 
     private function applyRuntime(): void

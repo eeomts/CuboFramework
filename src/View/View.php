@@ -29,14 +29,14 @@ abstract class View implements Helper
     /** Chave de config com as raizes de template, na ordem de precedencia. */
     public const TEMPLATE_ROOTS = 'template_roots';
 
+    /** Chave de config onde o Bootstrapper deixa o carregador de assets. */
+    public const IMPORTS = 'imports';
+
     /**
      * Adiciona uma View filha. Aceita a instancia ou o nome da classe.
      *
      * @example addChild(new MenuHelper())
      * @example addChild('ImportHelper')
-     *
-     * O v1 fazia new $child() as cegas: um nome errado virava fatal error
-     * cru. Aqui a classe e validada antes de instanciar.
      */
     public function addChild(View|string $child): void
     {
@@ -70,12 +70,6 @@ abstract class View implements Helper
 
     /**
      * Le um parametro CRU (sem escape).
-     *
-     * v1 fazia return $this->_params[$param] direto: no PHP 8 isso emite
-     * "Warning: Undefined array key" quando o param nao foi setado. Agora
-     * um param ausente devolve o default.
-     *
-     * Para imprimir dado vindo do usuario em HTML, prefira escape().
      */
     public function getParam(string $param, mixed $default = null): mixed
     {
@@ -101,6 +95,19 @@ abstract class View implements Helper
         }
 
         return Security::escape((string) $value);
+    }
+
+    /**
+     * Tags de CSS e JS dos grupos pedidos, do arquivo de imports.
+     *
+     * Sem `[app] imports` declarado devolve vazio, para que a app que nao usa o
+     * carregador nao precise saber que ele existe.
+     */
+    public function assets(string ...$grupos): string
+    {
+        $imports = Config::getInstance()->getConfig(self::IMPORTS);
+
+        return $imports instanceof Imports ? $imports->render(...$grupos) : '';
     }
 
     /**

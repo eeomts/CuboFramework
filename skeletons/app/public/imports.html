@@ -1,0 +1,18 @@
+<!--
+  Assets
+  Cada bloco e um grupo. O template pede o que precisa:
+
+      <?= $view->assets('base') ?> o <head>
+      <?= $view->assets('scripts', 'grid') ?> antes do </body>
+
+  O grupo decide ONDE a tag sai -- e por isso que 'base' e 'scripts' sao
+  separados. Sem pedir grupo nenhum, vale o 'base'.
+
+  Para ativar, descomente `imports = public/imports.html` na secao [app].
+-->
+
+<!-- @grupo base -->
+<link rel="stylesheet" href="/assets/css/app.css">
+
+<!-- @grupo scripts -->
+<script src="/assets/js/app.js"></script>
