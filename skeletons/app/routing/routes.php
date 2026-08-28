@@ -1,14 +1,8 @@
 <?php
 
 /**
- * Tabela de rotas da aplicacao.
- *
- * Declare aqui so o que a convencao nao resolve: verbo HTTP proprio, URL que
- * nao espelha nome de classe, middleware por rota ou URL gerada por nome.
- * Todo caminho que nao casar com nada daqui continua caindo na convencao
- * /controlador/acao/param/valor -- as duas formas convivem.
- *
- * Para ligar, descomente `routes = config/routes.php` na secao [app] do
+ * Tabela de rotas da aplicacao. 
+ * Para ligar, descomente `routes = routing/routes.php` na secao [app] do
  * config.ini.
  */
 

@@ -31,7 +31,7 @@ final class RotasPeloIniTest extends TestCase
     #[PreserveGlobalState(false)]
     public function testTabelaDeclaradaNoIniChegaAoRouter(): void
     {
-        $config = $this->configCom(['routes' => 'config/routes.php']);
+        $config = $this->configCom(['routes' => 'routing/routes.php']);
 
         (new Bootstrapper($config, self::APP))->boot();
 
