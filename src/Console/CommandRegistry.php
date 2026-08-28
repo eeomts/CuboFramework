@@ -5,6 +5,9 @@ namespace Cubo\Console;
 use Cubo\Console\Commands\BuildCommand;
 use Cubo\Console\Commands\HelpCommand;
 use Cubo\Console\Commands\InitCommand;
+use Cubo\Console\Commands\MigrateCommand;
+use Cubo\Console\Commands\MigrateRollbackCommand;
+use Cubo\Console\Commands\MigrateStatusCommand;
 use Cubo\Console\Commands\VersionCommand;
 use Cubo\Exceptions\CommandNotFoundException;
 
@@ -33,6 +36,9 @@ final class CommandRegistry
             VersionCommand::class,
             new BuildCommand($paths),
             new InitCommand($paths),
+            MigrateCommand::class,
+            MigrateRollbackCommand::class,
+            MigrateStatusCommand::class,
         ]);
     }
 

@@ -10,13 +10,10 @@ namespace Cubo\Exceptions;
  */
 class CuboException extends \RuntimeException
 {
-    /**
-     * Códigos herdados do legado (Cubo_ErrorManager) mantidos por
-     * compatibilidade com a página de erro (error/index/code/{code}).
-     */
     public const CODE_CONTROLLER_MISSING = 107;
     public const CODE_TEMPLATE_MISSING = 108;
 
-    /** Novo no 2.1 (nao vem do legado): rota declarada apontando para action inexistente. */
+    # Novos no 2.1
     public const CODE_ACTION_MISSING = 109;
+    public const CODE_SCHEMA_CONVENTION = 110;
 }

@@ -40,11 +40,13 @@ class Config
         else
             $protocol = 'http';
 
+        // em CLI (cubo migrate) nao ha requisicao: sem o default, o boot da app
+        // quebraria com "Undefined array key" antes de chegar no comando
         if (!defined("SERVER"))
-            define('SERVER', $_SERVER['HTTP_HOST']);
+            define('SERVER', $_SERVER['HTTP_HOST'] ?? '');
 
         if (!defined("WEB"))
-            define('WEB', $_SERVER['REQUEST_URI']);
+            define('WEB', $_SERVER['REQUEST_URI'] ?? '');
 
         if (!defined("CUBO_DIR_NAME"))
             define('CUBO_DIR_NAME', str_replace($protocol . '://', '', $this->getConfig('ini.cubo.host')));

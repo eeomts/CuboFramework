@@ -32,10 +32,16 @@ final class Bootstrapper
     }
 
     /**
+     * Boot enxuto para a linha de comando.
+     */
+    public function bootConsole(): void
+    {
+        $this->applyRuntime();
+        $this->applyDatabase();
+    }
+
+    /**
      * Carrega a tabela de rotas declarada em [app] routes.
-     *
-     * O arquivo devolve uma RouteCollection. Sem a chave, a app roda so na
-     * convencao -- que e o caso de projeto novo.
      */
     private function applyRoutes(): void
     {
