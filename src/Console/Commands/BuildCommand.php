@@ -51,7 +51,11 @@ final class BuildCommand implements Command
         Filesystem::copyDirectory($skeleton, $dist);
 
         $output->line('Copiando o framework para cubo/src');
-        Filesystem::copyDirectory($this->paths->src(), $dist . DIRECTORY_SEPARATOR . 'cubo' . DIRECTORY_SEPARATOR . 'src');
+        $cubo = $dist . DIRECTORY_SEPARATOR . 'cubo';
+        Filesystem::copyDirectory($this->paths->src(), $cubo . DIRECTORY_SEPARATOR . 'src');
+
+        // o VERSION vive ao lado do src/, que e de onde o Cubo::version() le
+        copy($this->paths->versionFile(), $cubo . DIRECTORY_SEPARATOR . 'VERSION');
 
         $output->line('Instalando dependencias de producao');
         $code = $this->composerInstall($dist, $output);

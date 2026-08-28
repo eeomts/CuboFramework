@@ -17,6 +17,12 @@ readonly class Paths
         return $this->frameworkRoot . DIRECTORY_SEPARATOR . 'src';
     }
 
+    /** O build copia este arquivo junto do src/, senao o projeto gerado nao sabe a versao. */
+    public function versionFile(): string
+    {
+        return $this->frameworkRoot . DIRECTORY_SEPARATOR . 'VERSION';
+    }
+
     public function dist(): string
     {
         return $this->frameworkRoot . DIRECTORY_SEPARATOR . 'dist';

@@ -19,9 +19,27 @@ use Cubo\Routing\Router;
  */
 final class Cubo
 {
-    public const VERSION = '2.1.0-dev';
+    /** Devolvido quando o arquivo VERSION nao veio junto do framework. */
+    public const VERSAO_DESCONHECIDA = 'desconhecida';
+
+    private static ?string $versao = null;
 
     private MiddlewareStack $middlewares;
+
+    public static function version(): string
+    {
+        if (self::$versao !== null) {
+            return self::$versao;
+        }
+
+        $arquivo = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'VERSION';
+
+        $lido = is_file($arquivo)
+            ? trim((string) file_get_contents($arquivo))
+            : '';
+
+        return self::$versao = $lido !== '' ? $lido : self::VERSAO_DESCONHECIDA;
+    }
 
     /**
      * @param string $appRoot Caminho ABSOLUTO da raiz da aplicacao, onde vive
@@ -61,9 +79,6 @@ final class Cubo
 
     /**
      * Globais primeiro, depois os da rota.
-     *
-     * A pilha e montada por requisicao em vez de reaproveitar a global, senao o
-     * middleware de uma rota vazaria para a proxima.
      */
     private function pilhaDaRota(Route $route): MiddlewareStack
     {
@@ -93,14 +108,6 @@ final class Cubo
         return $this;
     }
 
-    /**
-     * Renderiza capturando a saida, porque a View escreve direto no output: sem
-     * isso os cabecalhos sairiam depois do corpo e o middleware nao teria o que
-     * inspecionar.
-     *
-     * Nao define Content-Type e herda o status ja emitido, para nao atropelar o
-     * controlador que mandou cabecalho na mao (download de PDF, por exemplo).
-     */
     private function render(Route $route, Request $request): Response
     {
         ob_start();

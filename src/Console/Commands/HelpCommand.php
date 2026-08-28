@@ -30,7 +30,7 @@ final class HelpCommand implements Command
 
     public function handle(Input $input, Output $output): int
     {
-        $output->line('Cubo ' . Cubo::VERSION);
+        $output->line('Cubo ' . Cubo::version());
         $output->line();
         $output->line('Uso: cubo <comando> [argumentos] [--opcoes]');
         $output->line();

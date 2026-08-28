@@ -22,7 +22,7 @@ final class VersionCommand implements Command
 
     public function handle(Input $input, Output $output): int
     {
-        $output->line('Cubo ' . Cubo::VERSION);
+        $output->line('Cubo ' . Cubo::version());
 
         return Kernel::EXIT_SUCCESS;
     }

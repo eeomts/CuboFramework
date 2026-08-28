@@ -70,7 +70,7 @@ final class KernelTest extends TestCase
             ->run(Input::fromArgv(['cubo.php', '--version']), $this->output);
 
         $this->assertSame(Kernel::EXIT_SUCCESS, $code);
-        $this->assertStringContainsString(Cubo::VERSION, $this->readStdout());
+        $this->assertStringContainsString(Cubo::version(), $this->readStdout());
     }
 
     public function testComandoDesconhecidoFalhaEEscreveNoStderr(): void
