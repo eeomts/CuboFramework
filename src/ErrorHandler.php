@@ -22,7 +22,7 @@ final class ErrorHandler
         private readonly string $host,
     ) {}
 
-    /** Registra como tratador global de excecoes nao capturadas. 
+    /** Registra como tratador global de excecoes nao capturadas. */
     public function register(): void
     {
         set_exception_handler($this->handle(...));

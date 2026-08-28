@@ -6,6 +6,8 @@ use Cubo\Session;
 use ReflectionClass;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 
 #[CoversClass(Session::class)]
 final class SessionTest extends TestCase
@@ -79,5 +81,58 @@ final class SessionTest extends TestCase
         $this->session->remove('login.telefone.ddd');
 
         $this->assertSame(['login' => ['nome' => 'joao']], $_SESSION);
+    }
+
+    // --- ciclo de vida da sessao (roda isolado: mexe em estado global) ---
+
+    /**
+     * Cobre o construtor, que e onde start() e chamado. Sem este teste, sumir
+     * com start() deixa getInstance() fatal e nada acusa.
+     */
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testGetInstanceIniciaASessaoEDevolveSempreOMesmoObjeto(): void
+    {
+        $session = Session::getInstance();
+
+        $this->assertSame(PHP_SESSION_ACTIVE, session_status());
+        $this->assertSame($session, Session::getInstance());
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testStartIniciaASessaoQuandoNaoHaUmaAtiva(): void
+    {
+        $session = (new ReflectionClass(Session::class))->newInstanceWithoutConstructor();
+
+        $this->assertSame(PHP_SESSION_NONE, session_status());
+
+        $session->start();
+
+        $this->assertSame(PHP_SESSION_ACTIVE, session_status());
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testStartNaoReiniciaUmaSessaoJaAtiva(): void
+    {
+        $session = (new ReflectionClass(Session::class))->newInstanceWithoutConstructor();
+
+        $session->start();
+        $id = session_id();
+        $session->start();
+
+        $this->assertSame($id, session_id());
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testDestroyEncerraASessao(): void
+    {
+        $session = (new ReflectionClass(Session::class))->newInstanceWithoutConstructor();
+        $session->start();
+
+        $this->assertTrue($session->destroy());
+        $this->assertSame(PHP_SESSION_NONE, session_status());
     }
 }

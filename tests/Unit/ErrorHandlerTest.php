@@ -80,4 +80,21 @@ final class ErrorHandlerTest extends TestCase
 
         $this->assertStringContainsString('via classe anonima', $outroLogger->capturado);
     }
+
+    /**
+     * register() nao tinha teste nenhum, e por isso pode sumir sem que a suite
+     * reclame. Aqui checamos que ele instala mesmo o handler global.
+     */
+    public function testRegisterInstalaOTratadorGlobalDeExcecoes(): void
+    {
+        $this->handler->register();
+
+        // set_exception_handler devolve o handler que estava no lugar
+        $instalado = set_exception_handler(null);
+
+        restore_exception_handler(); // desfaz o set_exception_handler(null)
+        restore_exception_handler(); // desfaz o register()
+
+        $this->assertInstanceOf(\Closure::class, $instalado);
+    }
 }
