@@ -19,6 +19,12 @@ use Illuminate\Database\Eloquent\Builder;
 trait SoftDeleteFlag
 {
     /**
+     * Coluna de exclusao logica. O Model que fugir da convencao sobrescreve:
+     * `const DELETED = 'outra_coluna';`
+     */
+    public const DELETED = 'deleted';
+
+    /**
      * O Eloquent chama boot<NomeDoTrait>() automaticamente ao inicializar o Model.
      */
     public static function bootSoftDeleteFlag(): void
@@ -44,7 +50,7 @@ trait SoftDeleteFlag
 
     public function getDeletedColumn(): string
     {
-        return defined(static::class . '::DELETED') ? static::DELETED : 'deleted';
+        return static::DELETED;
     }
 
     /** Nome da coluna prefixado com a tabela (evita ambiguidade em join). */

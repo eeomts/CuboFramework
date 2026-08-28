@@ -10,12 +10,9 @@
 
 namespace Cubo;
 
-class Benchmark
+final class Benchmark
 {
-    /**
-     * @return self
-     * @return null
-     */
+    /** @var self|null */
     private static ?self $instance = null;
 
     /** @var array<string, Test> */

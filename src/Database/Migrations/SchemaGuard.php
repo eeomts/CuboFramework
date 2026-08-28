@@ -37,7 +37,7 @@ final class SchemaGuard
         $tabela = $blueprint->getTable();
         $colunas = $blueprint->getColumns();
 
-        $nomes = array_map(static fn ($coluna): string => (string) $coluna->name, $colunas);
+        $nomes = array_map(static fn ($coluna): string => (string) $coluna->get('name'), $colunas);
 
         $violacoes = [
             ...($exigeColunasDeControle ? $this->faltamColunasDeControle($nomes) : []),
@@ -94,8 +94,8 @@ final class SchemaGuard
         $violacoes = [];
 
         foreach ($colunas as $coluna) {
-            $nome = (string) $coluna->name;
-            $tipo = (string) $coluna->type;
+            $nome = (string) $coluna->get('name');
+            $tipo = (string) $coluna->get('type');
 
             if (in_array($nome, self::OBRIGATORIAS, true) || $nome === 'id') {
                 continue;

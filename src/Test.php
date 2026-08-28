@@ -9,7 +9,7 @@
  */
 namespace Cubo;
 
-readonly class Test
+final readonly class Test
 {
     /**
      * @param int $code

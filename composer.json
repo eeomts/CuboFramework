@@ -27,7 +27,13 @@
         }
     },
     "scripts": {
-        "test": "phpunit"
+        "test": "phpunit",
+        "phpstan": "phpstan analyse --memory-limit=1G",
+        "check": [
+            "@composer validate --strict",
+            "@phpstan",
+            "@test"
+        ]
     },
     "config": {
         "allow-plugins": {

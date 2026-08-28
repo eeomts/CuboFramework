@@ -2,14 +2,10 @@
 
 namespace Cubo\Storage;
 
+use Cubo\Exceptions\StorageException;
+
 /**
  * Onde os arquivos ficam guardados.
- *
- * Quem usa conversa com esta interface, nao com o disco. 
- * Dois ganhos: 
- * o teste roda sem tocar em arquivo de verdade, e trocar disco local por S3/NFS nao encosta na
- * regra de negocio.
- *
  * @package Cubo
  * @author Mateus - github.com/eeomts
  */

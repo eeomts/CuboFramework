@@ -12,7 +12,7 @@ namespace Cubo;
 
 use Cubo\Tools\Arr;
 
-class Session
+final class Session
 {
 
     private static ?Session $_instance = null;

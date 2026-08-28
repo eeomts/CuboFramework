@@ -18,7 +18,7 @@ use PDO;
 use PDOStatement;
 use RuntimeException;
 
-class Db
+final class Db
 {
     public const DEFAULT_CONNECTION = 'default';
 

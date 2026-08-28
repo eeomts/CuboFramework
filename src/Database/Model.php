@@ -41,6 +41,10 @@ use Stringable;
  *
  * As tres ultimas dao para trocar por model: CREATED_AT/UPDATED_AT sao constantes
  * do proprio Eloquent, e a coluna de exclusao aceita `const DELETED = 'outra'`.
+ *
+ * O construtor vem do Eloquent com assinatura fixa (array $attributes = []) e
+ * subclasse nao muda isso -- e o que autoriza o `new static()` do SoftDeleteFlag.
+ * @phpstan-consistent-constructor
  */
 abstract class Model extends EloquentModel implements Stringable
 {

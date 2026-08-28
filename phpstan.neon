@@ -1,0 +1,8 @@
+parameters:
+    level: 5
+    paths:
+        - src
+
+    # nivel 5 e a fronteira onde a ferramenta ainda caca ERRO. Do 6 em diante ela
+    # passa a cobrar anotacao de tipo dentro de array -- trabalho mecanico, sem
+    # bug atras. Subir depois e uma decisao propria, nao divida.

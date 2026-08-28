@@ -10,7 +10,7 @@ namespace Cubo;
  * @author v2: Mateus - github.com/eeomts
  */
 
-class Config
+final class Config
 {
 
     private static ?Config $_instance = null;
@@ -86,7 +86,7 @@ class Config
         $this->_appRoot = rtrim($path, '/\\');
     }
 
-    /** @throws RuntimeException se nao foi setado via setAppRoot() */
+    /** @throws \RuntimeException se nao foi setado via setAppRoot() */
     public function getAppRoot(): string
     {
         if ($this->_appRoot === null) {
