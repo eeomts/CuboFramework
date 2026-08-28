@@ -4,6 +4,8 @@ namespace Cubo;
 
 use Cubo\Database\Db;
 use Cubo\Logging\FileLogger;
+use Cubo\Routing\RouteCollection;
+use Cubo\Routing\Router;
 use Cubo\View\View;
 
 /**
@@ -23,9 +25,43 @@ final class Bootstrapper
     {
         $this->applyRuntime();
         $this->applyTemplateRoots();
+        $this->applyRoutes();
         $this->applyDefaultView();
         $this->applyErrorHandling();
         $this->applyDatabase();
+    }
+
+    /**
+     * Carrega a tabela de rotas declarada em [app] routes.
+     *
+     * O arquivo devolve uma RouteCollection. Sem a chave, a app roda so na
+     * convencao -- que e o caso de projeto novo.
+     */
+    private function applyRoutes(): void
+    {
+        $arquivo = $this->string('routes');
+
+        if ($arquivo === '') {
+            return;
+        }
+
+        $caminho = $this->absolutePath($arquivo, false);
+
+        if (!is_file($caminho)) {
+            throw new \Cubo\Exceptions\CuboException(
+                "[app] routes aponta para um arquivo que nao existe: {$caminho}"
+            );
+        }
+
+        $rotas = require $caminho;
+
+        if (!$rotas instanceof RouteCollection) {
+            throw new \Cubo\Exceptions\CuboException(
+                "[app] routes: {$caminho} precisa devolver uma " . RouteCollection::class . '.'
+            );
+        }
+
+        $this->config->setConfig(Router::ROUTES, $rotas);
     }
 
     private function applyRuntime(): void

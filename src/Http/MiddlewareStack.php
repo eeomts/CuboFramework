@@ -29,6 +29,12 @@ class MiddlewareStack
         return $this;
     }
 
+    /** @return list<Middleware|class-string<Middleware>> */
+    public function all(): array
+    {
+        return $this->middlewares;
+    }
+
     /**
      * @param callable(Request): Response $final o que roda depois da cadeia
      */

@@ -16,26 +16,44 @@ use Cubo\Http\Request;
 
 class Router
 {
+    /** Chave de config onde o Bootstrapper deixa a tabela de rotas. */
+    public const ROUTES = 'routes';
+
     /**
      * @param SegmentMapper $mapper diz o que os segmentos de cabeca significam.
      *                              Sem argumento, vale o padrao controlador/acao.
      * @param string|null $basePath subpasta onde a app esta montada ('/app/').
      *                              Nulo tira do host declarado no config.ini.
+     * @param RouteCollection|null $routes tabela de rotas declaradas, consultada
+     *                              antes da convencao. Sem ela, so ha convencao.
      */
     public function __construct(
         private SegmentMapper $mapper = new ControllerActionMapper(),
         private ?string $basePath = null,
+        private ?RouteCollection $routes = null,
     ) {}
 
     /**
      * Monta a rota a partir do caminho da requisicao.
-     * Quem da significado aos primeiros segmentos e o SegmentMapper.
+     *
+     * A tabela de rotas tem precedencia; sem rota declarada que case, quem da
+     * significado aos segmentos e o SegmentMapper.
      */
     public function parseUrl(Request $request): Route
     {
+        $path = $this->requestPath($request);
+
+        // a tabela casa o caminho CRU: uma rota '/grid-menus' declarada nunca
+        // casaria contra o segmento ja convertido em camelCase
+        $declarada = $this->tabela()?->match($path, $request->method());
+
+        if ($declarada !== null) {
+            return $declarada;
+        }
+
         // cada segmento vira camelCase (ex: grid-menus -> gridMenus)
         $parsed = [];
-        foreach (explode('/', $this->requestPath($request)) as $segment) {
+        foreach (explode('/', $path) as $segment) {
             $parsed[] = $this->toCamelCase($segment);
         }
 
@@ -67,6 +85,21 @@ class Router
         }
 
         return trim($path, '/');
+    }
+
+    /**
+     * Tabela injetada tem precedencia; sem ela, vale a que o Bootstrapper
+     * carregou do [app] routes. Mesmo arranjo do basePath.
+     */
+    private function tabela(): ?RouteCollection
+    {
+        if ($this->routes !== null) {
+            return $this->routes;
+        }
+
+        $declarada = Config::getInstance()->getConfig(self::ROUTES);
+
+        return $declarada instanceof RouteCollection ? $declarada : null;
     }
 
     private function resolveBasePath(): string

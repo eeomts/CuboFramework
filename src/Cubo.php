@@ -2,6 +2,7 @@
 
 namespace Cubo;
 
+use Cubo\Exceptions\ActionNotFoundException;
 use Cubo\Exceptions\ControllerNotFoundException;
 use Cubo\Http\Middleware;
 use Cubo\Http\MiddlewareStack;
@@ -50,12 +51,33 @@ final class Cubo
         $request = new Request(trustProxy: $this->confiaNoProxy());
         $route = $this->router->parseUrl($request);
 
-        $resposta = $this->middlewares->execute(
+        $resposta = $this->pilhaDaRota($route)->execute(
             $request,
             fn (Request $req): Response => $this->render($route, $req),
         );
 
         $resposta->send();
+    }
+
+    /**
+     * Globais primeiro, depois os da rota.
+     *
+     * A pilha e montada por requisicao em vez de reaproveitar a global, senao o
+     * middleware de uma rota vazaria para a proxima.
+     */
+    private function pilhaDaRota(Route $route): MiddlewareStack
+    {
+        if ($route->middleware === []) {
+            return $this->middlewares;
+        }
+
+        $pilha = new MiddlewareStack();
+
+        foreach ([...$this->middlewares->all(), ...$route->middleware] as $middleware) {
+            $pilha->add($middleware);
+        }
+
+        return $pilha;
     }
 
     /** [app] trusted_proxy no config.ini; sem ele o X-Forwarded-Proto e ignorado. */
@@ -106,23 +128,54 @@ final class Cubo
         (new Bootstrapper($config, $config->getAppRoot()))->boot();
     }
 
-    /** Instancia, roda e renderiza o controlador. */
+    /**
+     * Instancia, roda e renderiza o controlador.
+     *
+     * Duas formas de despachar convivem de proposito: rota DECLARADA disse qual
+     * action chamar, entao o kernel chama; rota por CONVENCAO cai em index(), e
+     * o proprio controlador despacha lendo a rota (o padrao CoreController, que
+     * e o que getModule() existe para servir).
+     */
     public function dispatch(Route $route, Request $request): Controller
     {
         $controller = $this->resolveController($route, $request);
 
         $controller->initialize();
-        $controller->index();
+
+        if ($route->ehDeclarada()) {
+            $this->invocarAction($controller, $route);
+        } else {
+            $controller->index();
+        }
 
         $controller->getModule()->display();
 
         return $controller;
     }
 
+    /** @throws ActionNotFoundException */
+    private function invocarAction(Controller $controller, Route $route): void
+    {
+        if (!method_exists($controller, $route->method)) {
+            throw ActionNotFoundException::for($controller::class, $route->method);
+        }
+
+        $reflexao = new \ReflectionMethod($controller, $route->method);
+
+        // metodo herdado do Controller nao e alvo de rota: sem essa guarda, uma
+        // rota apontando para display() ou setView() viraria execucao arbitraria
+        if (!$reflexao->isPublic() || $reflexao->getDeclaringClass()->getName() === Controller::class) {
+            throw ActionNotFoundException::for($controller::class, $route->method);
+        }
+
+        $controller->{$route->method}();
+    }
+
     /** @throws ControllerNotFoundException */
     private function resolveController(Route $route, Request $request): Controller
     {
         $class = $this->mainController
+            ?? $route->controllerClass
             ?? $this->controllerNamespace() . ucfirst($route->controller) . 'Controller';
 
         if (!class_exists($class) || !is_subclass_of($class, Controller::class)) {

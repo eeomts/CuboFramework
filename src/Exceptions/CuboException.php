@@ -4,11 +4,6 @@ namespace Cubo\Exceptions;
 
 /**
  * Exceção base de todo o framework Cubo.
- *
- * Diferente do antigo Cubo_ErrorManager (que era Exception + handler ao mesmo
- * tempo), esta classe é uma exceção PURA: só carrega dados (mensagem, código,
- * causa anterior). Quem loga/redireciona é o {@see \Cubo\ErrorHandler}.
- *
  * @package Cubo
  * @author v1: João (Cubo_ErrorManager)
  * @author v2: Mateus - github.com/eeomts
@@ -21,4 +16,7 @@ class CuboException extends \RuntimeException
      */
     public const CODE_CONTROLLER_MISSING = 107;
     public const CODE_TEMPLATE_MISSING = 108;
+
+    /** Novo no 2.1 (nao vem do legado): rota declarada apontando para action inexistente. */
+    public const CODE_ACTION_MISSING = 109;
 }
