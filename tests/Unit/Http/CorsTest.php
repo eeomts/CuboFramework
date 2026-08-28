@@ -168,4 +168,54 @@ final class CorsTest extends TestCase
         $this->assertFalse(Cors::isPreflight(['REQUEST_METHOD' => 'POST']));
         $this->assertFalse(Cors::isPreflight([]));
     }
+
+    // --- guarda de credenciais e verbos anunciados ---
+
+    /**
+     * Refletir qualquer origem E liberar credenciais entregaria resposta
+     * autenticada a qualquer site: a combinacao e recusada na construcao.
+     */
+    public function testCredenciaisComOrigemAbertaEhRecusado(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/host declarado/');
+
+        new Cors(allowedHost: null, allowCredentials: true);
+    }
+
+    public function testCredenciaisComWildcardTambemEhRecusado(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        new Cors(allowedHost: '%', allowCredentials: true);
+    }
+
+    public function testCredenciaisComHostDeclaradoEhAceito(): void
+    {
+        $cors = new Cors(allowedHost: 'cliente.com', allowCredentials: true);
+
+        $headers = $cors->headersFor('https://cliente.com');
+
+        $this->assertSame('true', $headers['Access-Control-Allow-Credentials']);
+    }
+
+    public function testPreflightAnunciaOsVerbosPadrao(): void
+    {
+        $cors = new Cors('cliente.com');
+
+        $headers = $cors->preflightHeadersFor('https://cliente.com');
+
+        $this->assertSame('GET, POST, OPTIONS', $headers['Access-Control-Allow-Methods']);
+    }
+
+    /** Sem isso, PUT e DELETE seriam bloqueados pelo navegador quando o
+     *  roteamento por verbo entrar. */
+    public function testPreflightAnunciaOsVerbosDeclarados(): void
+    {
+        $cors = new Cors('cliente.com', allowedMethods: ['GET', 'PUT', 'DELETE', 'OPTIONS']);
+
+        $headers = $cors->preflightHeadersFor('https://cliente.com');
+
+        $this->assertSame('GET, PUT, DELETE, OPTIONS', $headers['Access-Control-Allow-Methods']);
+    }
 }

@@ -22,17 +22,32 @@ final class Cors
     /** Valor de url_access que significa "qualquer origem". */
     private const WILDCARD = '%';
 
+    /** @var list<string> */
+    private const METODOS_PADRAO = ['GET', 'POST', 'OPTIONS'];
+
     /**
      * @param string|null $allowedHost Host permitido (o url_access da chave).
      *                                 null, '' ou '%' liberam qualquer origem.
      * @param bool $allowCredentials Permite ao navegador mandar cookies/sessao
      *                               e ao chamador ler a resposta. Fica desligado
      *                               porque esta API autentica por header.
+     * @param list<string> $allowedMethods Verbos anunciados no preflight.
+     *
+     * @throws \InvalidArgumentException se pedir credenciais com origem aberta:
+     *         refletir qualquer origem E liberar credenciais entrega resposta
+     *         autenticada para qualquer site
      */
     public function __construct(
         private readonly ?string $allowedHost = null,
         private readonly bool $allowCredentials = false,
+        private readonly array $allowedMethods = self::METODOS_PADRAO,
     ) {
+        if ($allowCredentials && $this->allowsAnyOrigin()) {
+            throw new \InvalidArgumentException(
+                'allowCredentials exige um host declarado: com origem aberta, '
+                . 'qualquer site leria resposta autenticada desta API.'
+            );
+        }
     }
 
     /**
@@ -113,7 +128,7 @@ final class Cors
             return [];
         }
 
-        $headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS';
+        $headers['Access-Control-Allow-Methods'] = implode(', ', $this->allowedMethods);
 
         if ($requestHeaders !== null && trim($requestHeaders) !== '') {
             $headers['Access-Control-Allow-Headers'] = $requestHeaders;
@@ -142,6 +157,10 @@ final class Cors
      */
     public function send(array $headers): void
     {
+        if (headers_sent()) {
+            return;
+        }
+
         foreach ($headers as $name => $value) {
             header("{$name}: {$value}");
         }

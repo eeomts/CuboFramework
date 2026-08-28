@@ -7,6 +7,7 @@ use Cubo\Config;
 use Cubo\Controller;
 use Cubo\Cubo;
 use Cubo\Exceptions\CuboException;
+use Cubo\Http\Request;
 use Cubo\Routing\Route;
 use Cubo\Tests\Support\Controllers\SpyController;
 use Cubo\Tests\Support\Views\RecordingView;
@@ -58,7 +59,7 @@ final class BootstrapperTest extends TestCase
     {
         $this->bootFixture();
 
-        $controller = (new Cubo(self::APP))->dispatch(new Route('spy', 'index'));
+        $controller = (new Cubo(self::APP))->dispatch(new Route('spy', 'index'), new Request());
 
         $this->assertInstanceOf(SpyController::class, $controller);
     }

@@ -3,6 +3,7 @@
 namespace Cubo;
 
 use Cubo\Database\Db;
+use Cubo\Http\Request;
 use Cubo\Routing\Route;
 use Cubo\View\View;
 
@@ -17,6 +18,8 @@ abstract class Controller
 {
     protected View $_view;
 
+    protected Request $_request;
+
     /** Rota que originou a requisicao. */
     protected ?Route $_route;
 
@@ -29,10 +32,15 @@ abstract class Controller
     /** @var (\Closure(): View)|null */
     private static ?\Closure $_defaultViewFactory = null;
 
-    /** @param View|null $view se omitida, usa a fabrica padrao */
-    public function __construct(?Route $route = null, ?View $view = null)
+    /**
+     * @param Route|null $route rota resolvida pelo Router
+     * @param Request|null $request requisicao HTTP
+     * @param View|null $view se omitida, usa a fabrica padrao
+     */
+    public function __construct(?Route $route = null, ?Request $request = null, ?View $view = null)
     {
         $this->_route = $route;
+        $this->_request = $request ?? new Request();
         $this->_view = $view ?? self::makeDefaultView();
     }
 
@@ -84,6 +92,11 @@ abstract class Controller
     public function setModule(Controller $module): void
     {
         $this->_module = $module;
+    }
+
+    public function getRequest(): Request
+    {
+        return $this->_request;
     }
 
     public function getView(): View

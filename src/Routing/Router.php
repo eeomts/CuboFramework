@@ -5,22 +5,17 @@
  * Traca as rotas e define controlador, metodo e parametros a partir da REQUEST_URI.
  *
  * @package Cubo
- * @author v1 Joao / v1.1 Cristiano
- *
- * V2 - core cubo atualizado para php 8+
- * @author Mateus - github.com/eeomts
+ * @author v1: Joao / v1.1: Cristiano
+ * @author v2: Mateus - github.com/eeomts
  */
 
 namespace Cubo\Routing;
 
 use Cubo\Config;
+use Cubo\Http\Request;
 
 class Router
 {
-    /**
-     * @param SegmentMapper $mapper diz o que os segmentos de cabeca significam.
-     *                              Sem argumento, vale o padrao controlador/acao.
-     */
     /**
      * @param SegmentMapper $mapper diz o que os segmentos de cabeca significam.
      *                              Sem argumento, vale o padrao controlador/acao.
@@ -33,14 +28,14 @@ class Router
     ) {}
 
     /**
-     * Le a REQUEST_URI, quebra em segmentos e monta a rota.
+     * Monta a rota a partir do caminho da requisicao.
      * Quem da significado aos primeiros segmentos e o SegmentMapper.
      */
-    public function parseUrl(): Route
+    public function parseUrl(Request $request): Route
     {
         // cada segmento vira camelCase (ex: grid-menus -> gridMenus)
         $parsed = [];
-        foreach (explode('/', $this->requestPath()) as $segment) {
+        foreach (explode('/', $this->requestPath($request)) as $segment) {
             $parsed[] = $this->toCamelCase($segment);
         }
 
@@ -60,10 +55,9 @@ class Router
      * Caminho da requisicao sem a subpasta de montagem e sem query string.
      * O dominio nao participa: rota e caminho, nao host.
      */
-    private function requestPath(): string
+    private function requestPath(Request $request): string
     {
-        $uri = (string) ($_SERVER['REQUEST_URI'] ?? '/');
-        $path = (string) (parse_url($uri, PHP_URL_PATH) ?: '/');
+        $path = $request->path();
 
         $base = rtrim($this->resolveBasePath(), '/') . '/';
         $normalizado = rtrim($path, '/') . '/';

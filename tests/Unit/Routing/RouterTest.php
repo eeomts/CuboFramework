@@ -5,6 +5,7 @@ namespace Cubo\Tests\Unit\Routing;
 use Cubo\Routing\ControllerActionMapper;
 use Cubo\Routing\Route;
 use Cubo\Routing\RouteHead;
+use Cubo\Http\Request;
 use Cubo\Routing\Router;
 use Cubo\Tests\Support\Routing\ModuleFeatureActionMapper;
 use PHPUnit\Framework\TestCase;
@@ -69,13 +70,19 @@ final class RouterTest extends TestCase
         $this->assertSame('index', $head->method);
     }
 
-    // --- parseUrl (le $_SERVER['REQUEST_URI'] e o basePath injetado) ---
+    // --- parseUrl (recebe a Request e o basePath injetado) ---
+
+    /** A rota sai da Request, entao o teste nao precisa mexer em $_SERVER. */
+    private function requisicao(string $uri): Request
+    {
+        return new Request(server: ['REQUEST_URI' => $uri]);
+    }
 
     public function testParseUrlMontaRotaComControllerMetodoEParams(): void
     {
-        $_SERVER['REQUEST_URI'] = '/app/financeiro/grid-menus/id/5';
+        $requisicao = $this->requisicao('/app/financeiro/grid-menus/id/5');
 
-        $route = (new Router(basePath: '/app/'))->parseUrl();
+        $route = (new Router(basePath: '/app/'))->parseUrl($requisicao);
 
         $this->assertInstanceOf(Route::class, $route);
         $this->assertSame('financeiro', $route->controller);
@@ -88,9 +95,9 @@ final class RouterTest extends TestCase
 
     public function testParseUrlUsaIndexQuandoUrlVazia(): void
     {
-        $_SERVER['REQUEST_URI'] = '/app/';
+        $requisicao = $this->requisicao('/app/');
 
-        $route = (new Router(basePath: '/app/'))->parseUrl();
+        $route = (new Router(basePath: '/app/'))->parseUrl($requisicao);
 
         $this->assertSame('index', $route->controller);
         $this->assertSame('index', $route->method);
@@ -100,9 +107,9 @@ final class RouterTest extends TestCase
     {
         // regressao: o parse antigo subtraia o host de SERVER_NAME . REQUEST_URI,
         // e SERVER_NAME vem sem a porta -- entao 'localhost' virava controlador
-        $_SERVER['REQUEST_URI'] = '/';
+        $requisicao = $this->requisicao('/');
 
-        $route = (new Router(basePath: '/'))->parseUrl();
+        $route = (new Router(basePath: '/'))->parseUrl($requisicao);
 
         $this->assertSame('index', $route->controller);
         $this->assertSame('index', $route->method);
@@ -110,9 +117,9 @@ final class RouterTest extends TestCase
 
     public function testQueryStringNaoEntraNaRota(): void
     {
-        $_SERVER['REQUEST_URI'] = '/app/financeiro/grid-menus?busca=x&pagina=2';
+        $requisicao = $this->requisicao('/app/financeiro/grid-menus?busca=x&pagina=2');
 
-        $route = (new Router(basePath: '/app/'))->parseUrl();
+        $route = (new Router(basePath: '/app/'))->parseUrl($requisicao);
 
         $this->assertSame('financeiro', $route->controller);
         $this->assertSame('gridMenus', $route->method);
@@ -120,9 +127,9 @@ final class RouterTest extends TestCase
 
     public function testBasePathSemBarraFinalTambemCasa(): void
     {
-        $_SERVER['REQUEST_URI'] = '/app';
+        $requisicao = $this->requisicao('/app');
 
-        $route = (new Router(basePath: '/app'))->parseUrl();
+        $route = (new Router(basePath: '/app'))->parseUrl($requisicao);
 
         $this->assertSame('index', $route->controller);
     }
@@ -133,9 +140,9 @@ final class RouterTest extends TestCase
      */
     public function testParseUrlComMapperDeModuloLeTresSegmentos(): void
     {
-        $_SERVER['REQUEST_URI'] = '/app/produtividade/tarefa/minhas/id/7';
+        $requisicao = $this->requisicao('/app/produtividade/tarefa/minhas/id/7');
 
-        $route = (new Router(new ModuleFeatureActionMapper(), '/app/'))->parseUrl();
+        $route = (new Router(new ModuleFeatureActionMapper(), '/app/'))->parseUrl($requisicao);
 
         $this->assertSame('produtividade', $route->module);
         $this->assertSame('tarefa', $route->controller);
@@ -149,9 +156,9 @@ final class RouterTest extends TestCase
      */
     public function testParseUrlNaoDefineMaisConstantesGlobais(): void
     {
-        $_SERVER['REQUEST_URI'] = '/app/financeiro/grid-menus';
+        $requisicao = $this->requisicao('/app/financeiro/grid-menus');
 
-        (new Router(basePath: '/app/'))->parseUrl();
+        (new Router(basePath: '/app/'))->parseUrl($requisicao);
 
         $this->assertFalse(defined('__CONTROLLER__'));
         $this->assertFalse(defined('__ACTION__'));

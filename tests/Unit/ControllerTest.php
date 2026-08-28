@@ -3,6 +3,7 @@
 namespace Cubo\Tests\Unit;
 
 use Cubo\Controller;
+use Cubo\Http\Request;
 use Cubo\Routing\Route;
 use Cubo\Tests\Support\Controllers\FakeController;
 use Cubo\Tests\Support\Views\FakeView;
@@ -41,7 +42,7 @@ final class ControllerTest extends TestCase
         // DefaultView::getInstance() -- o framework dependendo da app.
         $view = new FakeView();
 
-        $controller = new FakeController(null, $view);
+        $controller = new FakeController(null, new Request(), $view);
 
         $this->assertSame($view, $controller->getView());
     }
@@ -67,7 +68,7 @@ final class ControllerTest extends TestCase
     public function testDisplayRenderizaAView(): void
     {
         $view = new SpyHelperView();
-        $controller = new FakeController(null, $view);
+        $controller = new FakeController(null, new Request(), $view);
 
         $controller->display();
 
@@ -76,7 +77,7 @@ final class ControllerTest extends TestCase
 
     public function testSetViewTrocaAView(): void
     {
-        $controller = new FakeController(null, new FakeView());
+        $controller = new FakeController(null, new Request(), new FakeView());
         $outra = new FakeView();
 
         $controller->setView($outra);
@@ -86,7 +87,7 @@ final class ControllerTest extends TestCase
 
     public function testGetModuleDevolveOProprioControllerQuandoNaoHaModulo(): void
     {
-        $controller = new FakeController(null, new FakeView());
+        $controller = new FakeController(null, new Request(), new FakeView());
 
         $this->assertSame($controller, $controller->getModule());
     }
@@ -96,8 +97,8 @@ final class ControllerTest extends TestCase
         // E assim que o framework despacha: o CoreController (main controller)
         // resolve quem responde pela url e o orquestrador renderiza
         // $core->getModule()->display() -- a view do MODULO, nao a do core.
-        $core = new FakeController(null, new FakeView());
-        $modulo = new FakeController(null, new FakeView());
+        $core = new FakeController(null, new Request(), new FakeView());
+        $modulo = new FakeController(null, new Request(), new FakeView());
 
         $core->setModule($modulo);
 
@@ -110,7 +111,7 @@ final class ControllerTest extends TestCase
         // agora e o VO Route que o Router ja devolvia desde o REFAC 5.
         $rota = new Route('financeiro', 'gridMenus', ['id' => '7']);
 
-        $controller = new FakeController($rota, new FakeView());
+        $controller = new FakeController($rota, new Request(), new FakeView());
 
         $this->assertSame($rota, $controller->getRoute());
         $this->assertSame('financeiro', $controller->getRoute()->controller);

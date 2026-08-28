@@ -5,6 +5,7 @@ namespace Cubo\Tests\Unit;
 use Cubo\Controller;
 use Cubo\Cubo;
 use Cubo\Exceptions\ControllerNotFoundException;
+use Cubo\Http\Request;
 use Cubo\Routing\Route;
 use Cubo\Tests\Support\Controllers\CoreLikeController;
 use Cubo\Tests\Support\Controllers\ImpostorController;
@@ -37,7 +38,7 @@ final class CuboTest extends TestCase
     {
         $kernel = new Cubo(self::APP_ROOT, SpyController::class);
 
-        $controller = $kernel->dispatch(new Route('spy', 'index'));
+        $controller = $kernel->dispatch(new Route('spy', 'index'), new Request());
 
         $this->assertInstanceOf(SpyController::class, $controller);
         $this->assertSame(['initialize', 'index', 'display'], $controller->calls);
@@ -48,7 +49,7 @@ final class CuboTest extends TestCase
         $rota = new Route('spy', 'gridMenus', ['id' => '7']);
         $kernel = new Cubo(self::APP_ROOT, SpyController::class);
 
-        $controller = $kernel->dispatch($rota);
+        $controller = $kernel->dispatch($rota, new Request());
 
         $this->assertSame($rota, $controller->getRoute());
     }
@@ -57,7 +58,7 @@ final class CuboTest extends TestCase
     {
         $kernel = new Cubo(self::APP_ROOT, SpyController::class);
 
-        $controller = $kernel->dispatch(new Route('spy', 'index'));
+        $controller = $kernel->dispatch(new Route('spy', 'index'), new Request());
         $view = $controller->getView();
 
         $this->assertInstanceOf(RecordingView::class, $view);
@@ -69,7 +70,7 @@ final class CuboTest extends TestCase
         // O v1 fazia $core->getModule()->display(): quem renderiza e o MODULO.
         $kernel = new Cubo(self::APP_ROOT, CoreLikeController::class);
 
-        $core = $kernel->dispatch(new Route('spy', 'index'));
+        $core = $kernel->dispatch(new Route('spy', 'index'), new Request());
         $modulo = $core->getModule();
 
         $this->assertNotSame($core, $modulo);
@@ -82,7 +83,7 @@ final class CuboTest extends TestCase
     {
         $kernel = new Cubo(self::APP_ROOT, null, self::NS);
 
-        $controller = $kernel->dispatch(new Route('spy', 'index'));
+        $controller = $kernel->dispatch(new Route('spy', 'index'), new Request());
 
         $this->assertInstanceOf(SpyController::class, $controller);
     }
@@ -92,7 +93,7 @@ final class CuboTest extends TestCase
         $kernel = new Cubo(self::APP_ROOT, SpyController::class, self::NS);
 
         // a rota aponta para 'coreLike', mas o main controller manda
-        $controller = $kernel->dispatch(new Route('coreLike', 'index'));
+        $controller = $kernel->dispatch(new Route('coreLike', 'index'), new Request());
 
         $this->assertInstanceOf(SpyController::class, $controller);
     }
@@ -103,7 +104,7 @@ final class CuboTest extends TestCase
 
         $this->expectException(ControllerNotFoundException::class);
 
-        $kernel->dispatch(new Route('naoExiste', 'index'));
+        $kernel->dispatch(new Route('naoExiste', 'index'), new Request());
     }
 
     public function testClasseQueNaoEUmControllerDoCuboLanca(): void
@@ -116,7 +117,7 @@ final class CuboTest extends TestCase
 
         $this->expectException(ControllerNotFoundException::class);
 
-        $kernel->dispatch(new Route('impostor', 'index'));
+        $kernel->dispatch(new Route('impostor', 'index'), new Request());
     }
 
     public function testMainControllerQueNaoEUmControllerDoCuboLanca(): void
@@ -125,6 +126,6 @@ final class CuboTest extends TestCase
 
         $this->expectException(ControllerNotFoundException::class);
 
-        $kernel->dispatch(new Route('index', 'index'));
+        $kernel->dispatch(new Route('index', 'index'), new Request());
     }
 }
