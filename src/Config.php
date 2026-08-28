@@ -3,15 +3,11 @@
 namespace Cubo;
 
 /**
- * Configuracoes gerais do sistema
- * 
+ * Configuracoes gerais do sistema.
+ *
  * @package Cubo
- * @author v1 João
- * 
- * V2 - core cubo atualizado para php 8+
- * @package Cubo
- * @author Mateus - github.com/eeomts
- * 
+ * @author v1: João
+ * @author v2: Mateus - github.com/eeomts
  */
 
 class Config

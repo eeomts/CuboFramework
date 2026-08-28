@@ -13,11 +13,8 @@ use Cubo\Security;
  *
  * @package Cubo
  * @author v1: Cristiano (Cubo_View)
- * @see http://en.wikipedia.org/wiki/Composite_pattern
- *
- * V2 - core cubo atualizado para php 8+; tipagem, template resolvido em metodo
- * proprio (com excecao no lugar da pagina em branco) e escape() para XSS.
  * @author v2: Mateus - github.com/eeomts
+ * @see http://en.wikipedia.org/wiki/Composite_pattern
  */
 abstract class View implements Helper
 {

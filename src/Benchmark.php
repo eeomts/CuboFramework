@@ -1,17 +1,11 @@
 <?php
 
 /**
- * 
- * @v1
+ * Ferramenta de verificação de performance.
+ *
  * @package Cubo
- * @author Cristiano
- * 
- * @v2
- * @package Cubo
- * @author mateus - github.com/eeomts
- * 04/06/26 15:27
- * 
- * @todo Disponibiliza ferramenta para verificação de performance
+ * @author v1: Cristiano
+ * @author v2: Mateus - github.com/eeomts
  */
 
 namespace Cubo;
