@@ -22,6 +22,8 @@ final class Auth
     private const MSG_AUTHORIZED = 'Authorized Connection.';
     private const MSG_PREFLIGHT = 'CORS preflight.';
 
+    private const HASH_DESCARTAVEL = '$2y$10$eFDrd4BUVMJm6E77xuih1ugC3tPbWU8Pjpir4D3BQcazlg5NLlv1G';
+
     private bool $authorized = false;
 
     private bool $preflight = false;
@@ -67,9 +69,9 @@ final class Auth
             return;
         }
 
-        $key = $this->keys->findActiveByCredentials($credentials->appId, $credentials->appSecret);
+        $key = $this->keys->findActiveByAppId($credentials->appId);
 
-        if ($key === null) {
+        if (!self::secretConfere($key, $credentials->appSecret)) {
             // Sem ecoar de volta as credenciais enviadas.
             $this->message = self::MSG_BAD_CREDENTIALS;
 
@@ -143,13 +145,18 @@ final class Auth
         ));
     }
 
+    private static function secretConfere(?ApiKey $key, string $secret): bool
+    {
+        if ($key === null) {
+            password_verify($secret, self::HASH_DESCARTAVEL);
+
+            return false;
+        }
+
+        return $key->secretMatches($secret);
+    }
+
     /**
-     * Confere o Referer contra a allowlist da chave.
-     *
-     * Ausencia de Referer NEGA o acesso, inclusive quando url_access e '%'.
-     * Referer e falsificavel e vale pouco como controle, mas afrouxar aqui
-     * concederia acesso que o v1 negava.
-     *
      * @param array<string, string> $headers
      */
     private static function refererAllowed(array $headers, Cors $cors): bool

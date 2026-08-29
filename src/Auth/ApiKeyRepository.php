@@ -5,10 +5,6 @@ namespace Cubo\Auth;
 /**
  * Contrato de leitura das chaves de API.
  *
- * A implementacao mora na APP -- e ela que conhece onde as chaves ficam e em qual
- * conexao; o framework so conhece esta interface. Foi assim que a SQLi do v1
- * morreu: a consulta saiu de dentro do Auth.
- *
  * Implementacao esperada na app:
  *
  *     use App\Models\ChaveApi;
@@ -17,17 +13,16 @@ namespace Cubo\Auth;
  *
  *     final class EloquentApiKeyRepository implements ApiKeyRepository
  *     {
- *         public function findActiveByCredentials(string $appId, string $appSecret): ?ApiKey
+ *         public function findActiveByAppId(string $appId): ?ApiKey
  *         {
  *             $row = ChaveApi::query()
  *                 ->where('app_id', $appId)
- *                 ->where('app_secret', $appSecret)
  *                 ->where('fk_boolean', 1)
  *                 ->first();
  *
  *             return $row === null
  *                 ? null
- *                 : new ApiKey((int) $row->fk_conta, $row->url_access);
+ *                 : new ApiKey((int) $row->fk_conta, $row->app_secret, $row->url_access);
  *         }
  *     }
  *
@@ -37,12 +32,18 @@ namespace Cubo\Auth;
 interface ApiKeyRepository
 {
     /**
-     * Busca uma chave ATIVA (fk_boolean = 1) pelas credenciais informadas.
+     * Busca uma chave ATIVA (fk_boolean = 1) pelo app_id.
+     *
+     * O segredo ficou de fora da consulta de proposito. Compara-lo em SQL tinha
+     * tres problemas: exigia guarda-lo em texto puro (um dump do banco entregava
+     * todas as chaves), a comparacao nao era em tempo constante, e a collation
+     * padrao do Cubo (utf8mb4_unicode_ci) IGNORA a caixa -- entao 'SEGREDO'
+     * casava com 'segredo' e a chave perdia forca em silencio.
      *
      * IMPORTANTE: a implementacao TEM de usar bind (query builder do Eloquent),
-     * nunca concatenacao -- as credenciais chegam de um header HTTP.
+     * nunca concatenacao -- o app_id chega de um header HTTP.
      *
-     * @return ApiKey|null null quando nao existe chave ativa com esse par.
+     * @return ApiKey|null null quando nao existe chave ativa com esse app_id.
      */
-    public function findActiveByCredentials(string $appId, string $appSecret): ?ApiKey;
+    public function findActiveByAppId(string $appId): ?ApiKey;
 }
