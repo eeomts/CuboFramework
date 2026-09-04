@@ -3,6 +3,7 @@
 namespace Cubo\Http;
 
 use Cubo\Storage\UploadedFile;
+use Cubo\Validation\Sanitizer;
 use Cubo\Validation\Validator;
 use Cubo\Validation\ValidationException;
 
@@ -237,6 +238,28 @@ class Request
     public function attributes(): array
     {
         return $this->attributes;
+    }
+
+    /**
+     * Normaliza os dados da requisicao e devolve todos eles.
+     *
+     * Espelha o validate(), com uma diferenca de proposito: devolve o array
+     * inteiro, e nao so os campos das regras. Sanitizar dois campos de dez nao
+     * pode sumir com os outros oito, senao nao da para encadear com o validate.
+     *
+     * @param array<string, string> $rules chave => 'trim|money'
+     * @throws ValidationException se algum campo nao puder ser normalizado
+     * @return array<string, mixed> todos os dados, com os declarados normalizados
+     */
+    public function sanitize(array $rules): array
+    {
+        $sanitizer = new Sanitizer(array_merge($this->get, $this->post), $rules);
+
+        if (!$sanitizer->sanitize()) {
+            throw ValidationException::withErrors($sanitizer->getErrors());
+        }
+
+        return $sanitizer->getData();
     }
 
     /**

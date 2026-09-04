@@ -67,9 +67,55 @@ final class NumberTest extends TestCase
         $this->assertSame('1234', Number::formatMoney('1234'));
     }
 
-    public function testParseMoneyRetornaFloat(): void
+    #[DataProvider('provedorParseMoney')]
+    public function testParseMoney(string $entrada, float $esperado): void
     {
-        $this->assertSame(1234.56, Number::parseMoney('1.234,56'));
+        $this->assertSame($esperado, Number::parseMoney($entrada));
+    }
+
+    /** Os casos que obrigavam o app a sanitizar por fora antes de chamar. */
+    public static function provedorParseMoney(): array
+    {
+        return [
+            'mascara br' => ['1.234,56', 1234.56],
+            'com simbolo e espaco' => ['R$ 1.234,56', 1234.56],
+            'ponto decimal' => ['29.90', 29.9],
+            'so virgula' => ['1234,56', 1234.56],
+            'milhar sem centavos' => ['1.234', 1234.0],
+            'milhar duplo' => ['1.234.567', 1234567.0],
+            'formato us' => ['1,234.56', 1234.56],
+            'negativo' => ['-45,90', -45.9],
+            'sem parte inteira' => [',50', 0.5],
+            'tres casas nao e milhar quando comeca com zero' => ['0.500', 0.5],
+            'inteiro puro' => ['1234', 1234.0],
+            'sem digito' => ['abc', 0.0],
+            'vazio' => ['', 0.0],
+        ];
+    }
+
+    #[DataProvider('provedorToDecimal')]
+    public function testToDecimal(int|float|string|null $entrada, ?string $esperado): void
+    {
+        $this->assertSame($esperado, Number::toDecimal($entrada));
+    }
+
+    public static function provedorToDecimal(): array
+    {
+        return [
+            'string br' => ['R$ 1.234,5', '1234.50'],
+            'float' => [29.9, '29.90'],
+            'int' => [1234, '1234.00'],
+            'zero e valor' => ['0', '0.00'],
+            'null e ausencia' => [null, null],
+            'vazio e ausencia' => ['', null],
+            'so espaco e ausencia' => ['   ', null],
+            'texto sem digito e ausencia' => ['abc', null],
+        ];
+    }
+
+    public function testToDecimalAceitaOutrasCasas(): void
+    {
+        $this->assertSame('1.5000', Number::toDecimal('1,5', 4));
     }
 
     # ----------------------------------------------------------------- BYTES

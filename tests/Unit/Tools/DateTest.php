@@ -241,4 +241,27 @@ final class DateTest extends TestCase
         $this->assertSame('D', Date::businessDay(self::toTimestamp('2026-01-04'), false)); // domingo
         $this->assertIsInt(Date::businessDay(self::toTimestamp('2026-01-05'), false));     // dia util
     }
+
+    # ----------------------------------------------------------- TRY CONVERT
+
+    public function testTryConvertDevolveAConversaoQuandoADataCasa(): void
+    {
+        $this->assertSame('2026-01-05', Date::tryConvert('05/01/2026', 'eng'));
+    }
+
+    /** O convert estoura; este devolve null para quem trata formulario em laco. */
+    public function testTryConvertDevolveNullEmVezDeEstourar(): void
+    {
+        $this->assertNull(Date::tryConvert('bagunca', 'eng'));
+    }
+
+    public function testTryConvertRecusaDiaInexistente(): void
+    {
+        $this->assertNull(Date::tryConvert('31/02/2026', 'eng'));
+    }
+
+    public function testTryConvertNaoEngoleOutrosErros(): void
+    {
+        $this->assertSame('05/01/2026', Date::tryConvert('2026-01-05', 'br'));
+    }
 }

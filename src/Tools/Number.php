@@ -56,6 +56,9 @@ final class Number
     /**
      * String monetária BR para o formato de máquina.
      *
+     * Nao sanitiza e nao trata milhar sozinho; para entrada de formulario use
+     * parseMoney ou toDecimal.
+     *
      * @example formatMoney('1.234,56') retorna '1234.56'
      */
     public static function formatMoney(string $value, string $decimal = ',', string $milhares = '.'): string
@@ -68,11 +71,61 @@ final class Number
     }
 
     /**
-     * @example parseMoney('1.234,56') retorna 1234.56
+     * String monetaria em float, tolerante ao que o formulario manda.
+     *
+     * Aceita simbolo, espaco, sinal e os dois formatos de separador; o mais a
+     * direita conta como decimal. Sem digito nenhum devolve 0.0.
+     *
+     * @example parseMoney('R$ 1.234,56') retorna 1234.56
+     * @example parseMoney('1,234.56') retorna 1234.56
      */
     public static function parseMoney(string $value): float
     {
-        return (float) self::formatMoney($value);
+        $limpo = preg_replace('/[^\d,.\-]/', '', $value) ?? '';
+        $negativo = str_contains($limpo, '-');
+        $limpo = str_replace('-', '', $limpo);
+
+        if (!preg_match('/\d/', $limpo)) {
+            return 0.0;
+        }
+
+        $decimal = self::decimalSeparator($limpo);
+
+        if ($decimal === null) {
+            $numero = preg_replace('/\D/', '', $limpo) ?? '';
+        } else {
+            $corte = (int) strrpos($limpo, $decimal);
+
+            $numero = (preg_replace('/\D/', '', substr($limpo, 0, $corte)) ?? '')
+                . '.' . (preg_replace('/\D/', '', substr($limpo, $corte + 1)) ?? '');
+        }
+
+        return (float) ($negativo ? '-' . $numero : $numero);
+    }
+
+    /**
+     * Valor monetario como string decimal, no formato que o banco espera.
+     *
+     * Devolve null para ausencia (vazio, so espaco, texto sem digito) em vez de
+     * 0.00: zero e um valor, falta de valor nao e.
+     *
+     * @example toDecimal('R$ 1.234,5') retorna '1234.50'
+     */
+    public static function toDecimal(int|float|string|null $value, int $casas = 2): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (is_string($value)) {
+            if (!preg_match('/\d/', $value)) {
+                return null;
+            }
+
+            $value = self::parseMoney($value);
+        }
+
+        return number_format((float) $value, $casas, '.', '');
     }
 
     /**
@@ -95,6 +148,29 @@ final class Number
     }
 
     # ------------------------------------------------------------------- PRIVATE
+
+    /**
+     * Qual dos dois separadores e o decimal, ou null se o valor for so inteiro.
+     *
+     * "1.234" nao tem resposta certa: pode ser mil duzentos e trinta e quatro
+     * (mascara BR) ou um inteiro e 234 milesimos. Real nao tem tres casas, entao
+     * grupo de tres bem formado conta como milhar.
+     */
+    private static function decimalSeparator(string $value): ?string
+    {
+        if (preg_match('/^[1-9]\d{0,2}(\.\d{3})+$/', $value)) {
+            return null;
+        }
+
+        $virgula = strrpos($value, ',');
+        $ponto = strrpos($value, '.');
+
+        return match (true) {
+            $virgula !== false && ($ponto === false || $virgula > $ponto) => ',',
+            $ponto !== false => '.',
+            default => null,
+        };
+    }
 
     /**
      * Nucleo compartilhado por spellCurrency e spellNumber; diferem so nos rotulos.

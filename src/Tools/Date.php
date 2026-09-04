@@ -79,6 +79,21 @@ class Date
 		return self::formataData($date, $aliases[$format] ?? $format);
 	}
 
+	/**
+	 * Igual ao convert, mas devolve null em vez de estourar quando a data nao casa.
+	 *
+	 * Existe para quem processa formulario: entrada torta e caso esperado ali, e
+	 * try/catch dentro de laco esconde o fluxo normal.
+	 */
+	public static function tryConvert(string $date, string $format): ?string
+	{
+		try {
+			return self::convert($date, $format);
+		} catch (\InvalidArgumentException) {
+			return null;
+		}
+	}
+
 	/** Segundos como duração HH:MM:SS; aceita acima de 24h por ser duração. */
 	public static function formatDuration(int $seconds): string
 	{
