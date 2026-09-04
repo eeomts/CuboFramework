@@ -5,16 +5,13 @@
  * @author Mateus - github.com/eeomts
  *
  * Mapeamento padrao: segmento 0 = controlador, 1 = acao.
- *
  */
 
 namespace Cubo\Routing;
 
 final class ControllerActionMapper implements SegmentMapper
 {
-    /**
-     * @param list<string> $segments
-     */
+    /** @param list<string> $segments */
     public function head(array $segments): RouteHead
     {
         return new RouteHead(

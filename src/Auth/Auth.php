@@ -7,9 +7,6 @@ use Cubo\Http\Cors;
 /**
  * Autenticacao da API por chave (app_id + app_secret no header Authorization).
  *
- * A chave e resolvida ANTES de emitir os cabecalhos de CORS, e o Allow-Origin
- * sai derivado do url_access dela.
- *
  * @package Cubo
  * @author v1: Reginaldo (Cubo_Auth)
  * @author v2: Mateus - github.com/eeomts
@@ -33,8 +30,8 @@ final class Auth
     private int $conta = 0;
 
     /**
-     * @param ApiKeyRepository $keys Quem sabe ler a tabela de chaves (app).
-     * @param bool $allowCredentials Ver Cubo\Http\Cors.
+     * @param ApiKeyRepository $keys quem sabe ler a tabela de chaves
+     * @param bool $allowCredentials @see Cubo\Http\Cors
      */
     public function __construct(
         private readonly ApiKeyRepository $keys,
@@ -45,11 +42,8 @@ final class Auth
     /**
      * Roda a autenticacao e emite os cabecalhos de CORS cabiveis.
      *
-     * Headers e $_SERVER entram por parametro em vez de vir de getallheaders(),
-     * que nao existe em todo SAPI e impediria o teste.
-     *
-     * @param array<string, string> $headers Headers da requisicao.
-     * @param array<string, mixed> $server Tipicamente $_SERVER.
+     * @param array<string, string> $headers
+     * @param array<string, mixed> $server tipicamente $_SERVER
      */
     public function authenticate(array $headers, array $server): void
     {
@@ -72,7 +66,6 @@ final class Auth
         $key = $this->keys->findActiveByAppId($credentials->appId);
 
         if (!self::secretConfere($key, $credentials->appSecret)) {
-            // Sem ecoar de volta as credenciais enviadas.
             $this->message = self::MSG_BAD_CREDENTIALS;
 
             return;
@@ -89,8 +82,7 @@ final class Auth
             return;
         }
 
-        // Allow-Origin sai da allowlist da chave. Origem que nao bate recebe
-        // array vazio -> nenhum cabecalho -> o navegador bloqueia a leitura.
+        # origem fora da allowlist recebe array vazio: sem cabecalho, o navegador bloqueia
         $cors->send($cors->headersFor($origin));
 
         $this->conta = $key->conta;
@@ -103,12 +95,7 @@ final class Auth
         return $this->authorized;
     }
 
-    /**
-     * A requisicao era um preflight do navegador?
-     *
-     * Nesse caso nao houve o que autenticar: os cabecalhos de CORS ja foram
-     * emitidos e quem chama deve encerrar a resposta.
-     */
+    /** Preflight nao autentica nada: os cabecalhos ja sairam e quem chama encerra a resposta. */
     public function isPreflight(): bool
     {
         return $this->preflight;
@@ -119,9 +106,7 @@ final class Auth
         return $this->message;
     }
 
-    /**
-     * Id da conta dona da chave. Só é preenchido quando autorizado.
-     */
+    /** Id da conta dona da chave. So e preenchido quando autorizado. */
     public function getConta(): int
     {
         return $this->conta;
@@ -135,8 +120,7 @@ final class Auth
         $this->preflight = true;
         $this->message = self::MSG_PREFLIGHT;
 
-        // Sem Authorization no preflight nao ha chave para resolver, logo nao ha
-        // url_access. A allowlist e aplicada na requisicao real.
+        # preflight nao traz Authorization, logo nao ha url_access; a allowlist vale na requisicao real
         $cors = new Cors(null, $this->allowCredentials);
 
         $cors->send($cors->preflightHeadersFor(
@@ -148,6 +132,7 @@ final class Auth
     private static function secretConfere(?ApiKey $key, string $secret): bool
     {
         if ($key === null) {
+            # verifica contra um hash de mentira so para gastar o mesmo tempo do caminho valido
             password_verify($secret, self::HASH_DESCARTAVEL);
 
             return false;
@@ -171,9 +156,7 @@ final class Auth
     }
 
     /**
-     * Le um header ignorando a caixa do nome.
-     *
-     * Nome de header e case-insensitive por especificacao.
+     * Le um header ignorando a caixa: nome de header e case-insensitive por especificacao.
      *
      * @param array<string, string> $headers
      */

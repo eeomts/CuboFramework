@@ -14,7 +14,7 @@ use Cubo\Logging\LoggerInterface;
 final class ErrorHandler
 {
     /**
-     * @param LoggerInterface $logger destino do log (arquivo, stderr, Monolog...)
+     * @param LoggerInterface $logger destino do log
      * @param string $host host base para montar a URL da pagina de erro
      */
     public function __construct(
@@ -28,29 +28,20 @@ final class ErrorHandler
         set_exception_handler($this->handle(...));
     }
 
-    /**
-     * Trata a exceção: loga e redireciona para a página de erro. Encerra a
-     * execução (equivalente ao exit do legado).
-     */
+    /** Loga, redireciona para a pagina de erro e ENCERRA a execucao. */
     public function handle(\Throwable $e): void
     {
         $this->log($e);
         $this->redirect($e);
     }
 
-    /**
-     * Repassa a exceção formatada ao logger. O timestamp/nível é o logger quem
-     * carimba — aqui só descrevemos a exceção.
-     */
+    /** O timestamp e o nivel quem carimba e o logger. */
     public function log(\Throwable $e): void
     {
         $this->logger->error($this->format($e));
     }
 
-    /**
-     * Descreve a exceção como texto. Método puro (sem I/O) → testável.
-     * Percorre a cadeia de causas (getPrevious) que o v1 não registrava.
-     */
+    /** Metodo puro, sem I/O. Percorre a cadeia de causas (getPrevious). */
     public function format(\Throwable $e): string
     {
         $lines = [];
@@ -72,9 +63,7 @@ final class ErrorHandler
         return implode(PHP_EOL, $lines);
     }
 
-    /**
-     * Encaminha para error/index/code/{code} e encerra.
-     */
+    /** Encaminha para error/index/code/{code} e encerra. */
     private function redirect(\Throwable $e): void
     {
         header("Location: {$this->host}error/index/code/{$e->getCode()}");

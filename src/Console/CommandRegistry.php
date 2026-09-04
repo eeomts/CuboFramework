@@ -26,7 +26,6 @@ final class CommandRegistry
         }
     }
 
-    /** Os comandos que acompanham o framework. */
     public static function default(?Paths $paths = null): self
     {
         $paths ??= Paths::detect();
@@ -43,8 +42,7 @@ final class CommandRegistry
     }
 
     /**
-     * @param class-string<Command>|Command $command classe (instanciada na hora)
-     *                                               ou instancia ja pronta
+     * @param class-string<Command>|Command $command
      */
     public function add(string|Command $command): void
     {
@@ -71,8 +69,6 @@ final class CommandRegistry
     }
 
     /**
-     * Nome => descricao, em ordem alfabetica.
-     *
      * @return array<string,string>
      */
     public function descriptions(): array

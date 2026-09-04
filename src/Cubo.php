@@ -42,15 +42,10 @@ final class Cubo
     }
 
     /**
-     * @param string $appRoot Caminho ABSOLUTO da raiz da aplicacao, onde vive
-     *                          config/config.ini. O index.php passa __DIR__.
-     * @param string|null $mainController Controlador chamado em TODAS as
-     *                          requisicoes, em FQCN. Sem ele, o controlador sai
-     *                          da propria URL.
-     * @param string $controllerNamespace Prefixo dos controladores resolvidos
-     *                          pela URL (ex.: 'App\\Controllers\\'), ja que a
-     *                          URL fornece so o nome curto.
-     * @param Router $router Injetavel para teste; o padrao serve em producao.
+     * @param string $appRoot raiz ABSOLUTA da app, onde vive config/config.ini
+     * @param string|null $mainController FQCN chamado em TODAS as requisicoes; sem ele, sai da URL
+     * @param string $controllerNamespace prefixo dos controladores resolvidos pela URL
+     * @param Router $router injetavel para teste
      */
     public function __construct(
         private readonly string $appRoot,
@@ -77,9 +72,7 @@ final class Cubo
         $resposta->send();
     }
 
-    /**
-     * Globais primeiro, depois os da rota.
-     */
+    /** Globais primeiro, depois os da rota. */
     private function pilhaDaRota(Route $route): MiddlewareStack
     {
         if ($route->middleware === []) {
@@ -136,12 +129,8 @@ final class Cubo
     }
 
     /**
-     * Instancia, roda e renderiza o controlador.
-     *
-     * Duas formas de despachar convivem de proposito: rota DECLARADA disse qual
-     * action chamar, entao o kernel chama; rota por CONVENCAO cai em index(), e
-     * o proprio controlador despacha lendo a rota (o padrao CoreController, que
-     * e o que getModule() existe para servir).
+     * Duas formas de despachar convivem: rota DECLARADA diz a action e o kernel
+     * chama; rota por CONVENCAO cai em index() e o controlador despacha.
      */
     public function dispatch(Route $route, Request $request): Controller
     {
@@ -169,8 +158,7 @@ final class Cubo
 
         $reflexao = new \ReflectionMethod($controller, $route->method);
 
-        // metodo herdado do Controller nao e alvo de rota: sem essa guarda, uma
-        // rota apontando para display() ou setView() viraria execucao arbitraria
+        # metodo herdado do Controller nao e alvo de rota: display() ou setView() viraria execucao arbitraria
         if (!$reflexao->isPublic() || $reflexao->getDeclaringClass()->getName() === Controller::class) {
             throw ActionNotFoundException::for($controller::class, $route->method);
         }

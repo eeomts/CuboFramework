@@ -3,15 +3,9 @@
 namespace Cubo\Http;
 
 /**
- * Monta os cabecalhos de CORS da API.
+ * Monta os cabecalhos de CORS da API. A allowlist chega pronta de fora.
  *
- * CORS e como o servidor diz ao navegador quais origens podem LER suas
- * respostas (enviar o navegador sempre deixa; ler, nao).
- *
- * A allowlist chega pronta de fora: e o host autorizado da chave de API que a
- * app resolveu antes (ver Cubo\Auth\ApiKeyRepository). O Cors nao consulta nada.
- *
- * O calculo e puro -- headersFor() devolve array; send() e o unico I/O.
+ * @see Cubo\Auth\ApiKeyRepository
  *
  * @package Cubo
  * @author v1: Reginaldo (Cubo_Auth::enableCORS)
@@ -19,23 +13,16 @@ namespace Cubo\Http;
  */
 final class Cors
 {
-    /** Valor de url_access que significa "qualquer origem". */
     private const WILDCARD = '%';
 
     /** @var list<string> */
     private const METODOS_PADRAO = ['GET', 'POST', 'OPTIONS'];
 
     /**
-     * @param string|null $allowedHost Host permitido (o url_access da chave).
-     *                                 null, '' ou '%' liberam qualquer origem.
-     * @param bool $allowCredentials Permite ao navegador mandar cookies/sessao
-     *                               e ao chamador ler a resposta. Fica desligado
-     *                               porque esta API autentica por header.
-     * @param list<string> $allowedMethods Verbos anunciados no preflight.
-     *
-     * @throws \InvalidArgumentException se pedir credenciais com origem aberta:
-     *         refletir qualquer origem E liberar credenciais entrega resposta
-     *         autenticada para qualquer site
+     * @param string|null $allowedHost o url_access da chave; null, '' ou '%' liberam qualquer origem
+     * @param bool $allowCredentials cookies/sessao; desligado porque esta API autentica por header
+     * @param list<string> $allowedMethods verbos anunciados no preflight
+     * @throws \InvalidArgumentException credencial com origem aberta entrega resposta autenticada a qualquer site
      */
     public function __construct(
         private readonly ?string $allowedHost = null,
@@ -50,9 +37,6 @@ final class Cors
         }
     }
 
-    /**
-     * A chave nao restringe host? Entao qualquer origem passa.
-     */
     public function allowsAnyOrigin(): bool
     {
         $host = $this->allowedHost;
@@ -61,10 +45,8 @@ final class Cors
     }
 
     /**
-     * A origem informada pode ler as respostas desta API?
-     *
-     * Casa o host exato OU um subdominio dele. O ponto separador e exigido,
-     * entao "cliente.com.evil.net" nao passa por "cliente.com".
+     * Casa o host exato OU subdominio dele. O ponto separador e exigido, entao
+     * "cliente.com.evil.net" nao passa por "cliente.com".
      */
     public function allows(?string $origin): bool
     {
@@ -83,10 +65,8 @@ final class Cors
     }
 
     /**
-     * Cabecalhos da resposta a uma requisicao normal (nao-preflight).
-     *
      * Origem ausente ou nao autorizada devolve array VAZIO: sem Allow-Origin o
-     * navegador ja bloqueia a leitura, que e exatamente o que se quer.
+     * navegador ja bloqueia a leitura.
      *
      * @return array<string, string>
      */
@@ -99,7 +79,7 @@ final class Cors
         $headers = [
             'Access-Control-Allow-Origin' => $origin,
             'Access-Control-Max-Age' => '86400',
-            // Avisa caches que a resposta muda conforme a origem que pediu.
+            # avisa caches que a resposta muda conforme a origem que pediu
             'Vary' => 'Origin',
         ];
 
@@ -111,13 +91,10 @@ final class Cors
     }
 
     /**
-     * Cabecalhos da resposta ao preflight (OPTIONS).
+     * Cabecalhos da resposta ao preflight (OPTIONS), onde o allowedHost costuma
+     * vir vazio: preflight nao carrega Authorization.
      *
-     * O navegador nao manda Authorization no preflight, entao aqui nao ha chave
-     * para resolver e o allowedHost costuma vir vazio. A allowlist e aplicada na
-     * requisicao real, que e a que carrega a chave.
-     *
-     * @param string|null $requestHeaders Valor de Access-Control-Request-Headers.
+     * @param string|null $requestHeaders valor de Access-Control-Request-Headers
      * @return array<string, string>
      */
     public function preflightHeadersFor(?string $origin, ?string $requestHeaders = null): array
@@ -137,21 +114,14 @@ final class Cors
         return $headers;
     }
 
-    /**
-     * A requisicao atual e um preflight do navegador?
-     *
-     * Recebe o $_SERVER por parametro (em vez de ler o superglobal) para poder
-     * ser testado sem simular estado global.
-     *
-     * @param array<string, mixed> $server
-     */
+    /** @param array<string, mixed> $server */
     public static function isPreflight(array $server): bool
     {
         return ($server['REQUEST_METHOD'] ?? null) === 'OPTIONS';
     }
 
     /**
-     * Efetivamente emite os cabecalhos. Unico ponto de I/O da classe.
+     * Unico ponto de I/O da classe.
      *
      * @param array<string, string> $headers
      */
@@ -167,13 +137,10 @@ final class Cors
     }
 
     /**
-     * Extrai o host de uma origem ou de um url_access.
+     * Host de uma origem ou de um url_access, nas tres formas que aparecem:
+     * "https://app.x.com/foo", "//app.x.com" e "app.x.com" cru.
      *
-     * Aceita as tres formas que aparecem na pratica -- "https://app.x.com/foo",
-     * "//app.x.com" e "app.x.com" cru (como o url_access costuma estar gravado).
-     *
-     * A porta e descartada de proposito: url_access guarda dominio, nao origem
-     * completa, entao exigir porta igual reprovaria consumidor legitimo.
+     * A porta e descartada: url_access guarda dominio, nao origem completa.
      */
     private static function hostOf(?string $value): ?string
     {
@@ -187,7 +154,7 @@ final class Cors
             return null;
         }
 
-        // Sem "//" o parse_url leria tudo como path, nao como host.
+        # sem "//" o parse_url leria tudo como path, nao como host
         if (!str_contains($value, '//')) {
             $value = '//' . $value;
         }

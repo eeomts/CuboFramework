@@ -13,8 +13,8 @@ use Cubo\Tools\Filesystem;
 /**
  * Monta em dist/ o molde que o init copia: esqueleto + framework + vendor.
  *
- * O composer roda DENTRO do dist, ja no formato final do projeto, para o
- * autoloader nascer apontando pra cubo/src em vez de precisar de remendo.
+ * O composer roda DENTRO do dist para o autoloader nascer apontando pra
+ * cubo/src em vez de precisar de remendo.
  */
 final class BuildCommand implements Command
 {
@@ -54,7 +54,7 @@ final class BuildCommand implements Command
         $cubo = $dist . DIRECTORY_SEPARATOR . 'cubo';
         Filesystem::copyDirectory($this->paths->src(), $cubo . DIRECTORY_SEPARATOR . 'src');
 
-        // o VERSION vive ao lado do src/, que e de onde o Cubo::version() le
+        # o VERSION vive ao lado do src/, que e de onde o Cubo::version() le
         copy($this->paths->versionFile(), $cubo . DIRECTORY_SEPARATOR . 'VERSION');
 
         $output->line('Instalando dependencias de producao');

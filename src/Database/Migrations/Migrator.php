@@ -22,14 +22,11 @@ final class Migrator
         private readonly string $diretorio,
         ?Schema $schema = null,
     ) {
-        // o Schema tem de envolver a MESMA conexao, senao a migration escreveria
-        // num banco e o controle noutro
+        
         $this->schema = $schema ?? new Schema($connection);
     }
 
     /**
-     * Aplica o que ainda nao rodou.
-     *
      * @return list<string> nomes aplicados, na ordem
      */
     public function subir(): array
@@ -61,9 +58,7 @@ final class Migrator
     }
 
     /**
-     * Desfaz o ultimo lote.
-     *
-     * @return list<string> nomes desfeitos, do mais novo para o mais antigo
+     * @return list<string> do mais novo para o mais antigo
      */
     public function desfazer(): array
     {
@@ -95,8 +90,6 @@ final class Migrator
     }
 
     /**
-     * Situacao de cada migration encontrada em disco.
-     *
      * @return array<string, bool> nome => ja rodou
      */
     public function situacao(): array
@@ -125,8 +118,6 @@ final class Migrator
     }
 
     /**
-     * Nomes das migrations em disco, em ordem.
-     *
      * O prefixo de data no nome do arquivo (2026_08_27_143000_x.php) faz a
      * ordem alfabetica ser a ordem cronologica.
      *
@@ -184,10 +175,6 @@ final class Migrator
         return $migration;
     }
 
-    /**
-     * A tabela de controle e do framework, nao do dominio: sem `deleted`, porque
-     * apagar o registro E o rollback. Segue o resto da convencao (num_, created).
-     */
     private function garantirTabelaDeControle(): void
     {
         if ($this->schema->hasTable(self::TABELA)) {

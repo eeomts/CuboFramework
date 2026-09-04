@@ -3,7 +3,7 @@
 namespace Cubo\Http;
 
 /**
- * Gerencia a execução de uma cadeia de middlewares.
+ * Gerencia a execucao de uma cadeia de middlewares.
  *
  * @package Cubo
  */
@@ -12,9 +12,7 @@ class MiddlewareStack
     /** @var list<Middleware|class-string<Middleware>> */
     private array $middlewares = [];
 
-    /**
-     * @throws \InvalidArgumentException se a classe nao implementar Middleware
-     */
+    /** @throws \InvalidArgumentException se a classe nao implementar Middleware */
     public function add(Middleware|string $middleware): self
     {
         if (is_string($middleware) && !is_subclass_of($middleware, Middleware::class)) {
@@ -35,18 +33,15 @@ class MiddlewareStack
         return $this->middlewares;
     }
 
-    /**
-     * @param callable(Request): Response $final o que roda depois da cadeia
-     */
+    /** @param callable(Request): Response $final o que roda depois da cadeia */
     public function execute(Request $request, callable $final): Response
     {
         return $this->next(0, $request, $final);
     }
 
     /**
-     * O indice viaja por parametro, e nao como estado do objeto: assim um
-     * middleware que chame next() mais de uma vez repete a cadeia inteira em vez
-     * de pular o que sobrou, e o mesmo stack pode ser executado de novo.
+     * O indice viaja por parametro, nao como estado do objeto: middleware que
+     * chame next() duas vezes repete a cadeia em vez de pular o que sobrou.
      */
     private function next(int $indice, Request $request, callable $final): Response
     {

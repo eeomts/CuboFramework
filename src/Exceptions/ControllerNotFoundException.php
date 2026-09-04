@@ -4,9 +4,6 @@ namespace Cubo\Exceptions;
 
 /**
  * Lançada quando a requisição aponta para um controlador que não existe.
- *
- * Substitui: throw new Cubo_ErrorManager('Controlador não encontado', 107)
- *
  * @package Cubo
  * @author Mateus - github.com/eeomts
  */

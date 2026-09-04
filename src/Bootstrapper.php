@@ -33,18 +33,14 @@ final class Bootstrapper
         $this->applyDatabase();
     }
 
-    /**
-     * Boot enxuto para a linha de comando.
-     */
+    /** Boot enxuto para a linha de comando. */
     public function bootConsole(): void
     {
         $this->applyRuntime();
         $this->applyDatabase();
     }
 
-    /**
-     * Carrega a tabela de rotas declarada em [app] routes.
-     */
+    /** Carrega a tabela de rotas declarada em [app] routes. */
     private function applyRoutes(): void
     {
         $arquivo = $this->string('routes');
@@ -73,10 +69,8 @@ final class Bootstrapper
     }
 
     /**
-     * Monta o carregador de assets declarado em [app] imports.
-     *
-     * O caminho em disco serve para o filemtime da versao; a base vem do host
-     * do ini, para a app montada em subpasta gerar URL certa.
+     * Monta o carregador de assets declarado em [app] imports. O caminho em
+     * disco serve para o filemtime da versao.
      */
     private function applyImports(): void
     {

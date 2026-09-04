@@ -40,8 +40,7 @@ final class Config
         else
             $protocol = 'http';
 
-        // em CLI (cubo migrate) nao ha requisicao: sem o default, o boot da app
-        // quebraria com "Undefined array key" antes de chegar no comando
+        # em CLI nao ha requisicao: sem o default o boot quebraria com "Undefined array key"
         if (!defined("SERVER"))
             define('SERVER', $_SERVER['HTTP_HOST'] ?? '');
 
@@ -51,7 +50,7 @@ final class Config
         if (!defined("CUBO_DIR_NAME"))
             define('CUBO_DIR_NAME', str_replace($protocol . '://', '', $this->getConfig('ini.cubo.host')));
 
-        // DS e definido pelo index.php da APP, nao pelo framework.
+        # DS e definido pelo index.php da APP, nao pelo framework
         if (!defined("CUBO_ROOT"))
             define('CUBO_ROOT', dirname(__FILE__) . DIRECTORY_SEPARATOR);
 

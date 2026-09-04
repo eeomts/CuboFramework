@@ -5,11 +5,6 @@ namespace Cubo\Exceptions;
 /**
  * Lancada quando a View aponta para um template que nao existe em nenhuma
  * das raizes configuradas (template_root, core_template_root, custom_template_root).
- *
- * No v1 esse caso era SILENCIOSO: o render() testava as tres raizes e, se
- * nenhuma casasse, simplesmente nao incluia nada -- a pagina saia em branco,
- * sem erro nenhum (apesar do docblock do metodo prometer @throws).
- *
  * @package Cubo
  * @author Mateus - github.com/eeomts
  */

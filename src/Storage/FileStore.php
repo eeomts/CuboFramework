@@ -11,12 +11,10 @@ use Cubo\Exceptions\StorageException;
  */
 interface FileStore
 {
-    /**
-     * @throws StorageException Se nao conseguir gravar.
-     */
+    /** @throws StorageException se nao conseguir gravar */
     public function put(UploadedFile $file, string $storedName): void;
 
-    /** @return bool false se o arquivo nao existia ou nao pode ser removido. */
+    /** @return bool false se o arquivo nao existia ou nao pode ser removido */
     public function delete(string $storedName): bool;
 
     public function exists(string $storedName): bool;

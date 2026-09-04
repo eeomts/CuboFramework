@@ -3,13 +3,10 @@
 namespace Cubo\Logging;
 
 /**
- * Contrato mínimo de log do framework.
+ * Contrato minimo de log: quem precisa logar depende desta interface, nao de
+ * "escrever em arquivo".
  *
- * Existe para inverter a dependência: quem precisa logar (ex.: {@see \Cubo\ErrorHandler})
- * depende desta interface, não de "escrever em arquivo".
- *
- * Comeca só com error() — o único nível usado no framework hoje. Novos níveis
- * (warning/info/debug) entram aqui quando houver quem os chame.
+ * So tem error(), o unico nivel usado hoje.
  *
  * @package Cubo
  * @author Mateus - github.com/eeomts

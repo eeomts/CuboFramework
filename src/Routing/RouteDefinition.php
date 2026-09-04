@@ -3,10 +3,7 @@
 namespace Cubo\Routing;
 
 /**
- * Uma rota declarada na tabela.
- *
- * Diferente da convencao, aqui a URL nao precisa espelhar nome de classe: o
- * caminho, o verbo e o alvo sao ditos explicitamente.
+ * Uma rota declarada na tabela: caminho, verbo e alvo ditos explicitamente.
  *
  * @package Cubo
  * @author Mateus - github.com/eeomts
@@ -20,7 +17,7 @@ final class RouteDefinition
 
     /**
      * @param list<string> $verbs verbos HTTP que esta rota atende
-     * @param string $path caminho com parametros entre chaves ('/clientes/{id}')
+     * @param string $path parametros entre chaves ('/clientes/{id}')
      * @param class-string $controller controlador em FQCN
      * @param string $action metodo chamado no controlador
      */
@@ -32,7 +29,6 @@ final class RouteDefinition
     ) {
     }
 
-    /** Nome para gerar URL sem repetir o caminho pela app. */
     public function name(string $name): self
     {
         $this->name = $name;
@@ -40,7 +36,6 @@ final class RouteDefinition
         return $this;
     }
 
-    /** Middleware que roda so nesta rota, depois dos globais. */
     public function middleware(string ...$middleware): self
     {
         foreach ($middleware as $um) {
@@ -82,24 +77,18 @@ final class RouteDefinition
         return in_array(strtoupper($verb), $this->verbs, true);
     }
 
-    /**
-     * Casa o caminho e extrai os parametros nomeados.
-     *
-     * @return array<string, string>|null null quando o caminho nao casa
-     */
+    /** @return array<string, string>|null null quando o caminho nao casa */
     public function casa(string $path): ?array
     {
         if (!preg_match($this->regex(), trim($path, '/'), $encontrado)) {
             return null;
         }
 
-        // grupo nomeado aparece tambem por indice numerico; so os nomes valem
+        # grupo nomeado aparece tambem por indice numerico; so os nomes valem
         return array_filter($encontrado, 'is_string', ARRAY_FILTER_USE_KEY);
     }
 
     /**
-     * Monta a URL desta rota substituindo os parametros.
-     *
      * @param array<string, string|int> $params
      * @throws \InvalidArgumentException se faltar parametro que o caminho exige
      */
@@ -121,11 +110,8 @@ final class RouteDefinition
     }
 
     /**
-     * Caminho declarado virando expressao regular.
-     *
-     * O split alterna literal e parametro: o trecho literal e escapado e o
-     * parametro vira grupo nomeado. Escapar o caminho inteiro de uma vez nao
-     * funcionaria, porque as proprias chaves seriam escapadas.
+     * O split alterna literal e parametro. Escapar o caminho inteiro de uma vez
+     * nao funcionaria: as proprias chaves seriam escapadas.
      */
     private function regex(): string
     {

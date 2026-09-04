@@ -21,9 +21,7 @@ final readonly class UploadedFile
     }
 
     /**
-     * Monta a partir de uma entrada de $_FILES (ex: $_FILES['arquivo']).
-     *
-     * @throws StorageException Se o proprio PHP reportou erro no upload.
+     * @throws StorageException se o proprio PHP reportou erro no upload
      */
     public static function fromPhpUpload(array $file): self
     {
@@ -42,10 +40,6 @@ final readonly class UploadedFile
 
     /**
      * Extensao em minusculas e SEM o ponto.
-     *
-     * pathinfo em vez de fatiar a string na mao: o v1 fazia
-     * substr($nome, strlen($nome) - 4) e remendava quando a extensao nao tinha
-     * 3 letras, entao .jpeg saia errado.
      */
     public function extension(): string
     {

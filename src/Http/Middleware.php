@@ -3,19 +3,12 @@
 namespace Cubo\Http;
 
 /**
- * Interface para middlewares HTTP.
- *
- * Middleware intercepta requisição, pode rejeitar ou passa adiante.
+ * Interface para middlewares HTTP: intercepta, rejeita ou passa adiante.
  *
  * @package Cubo
  */
 interface Middleware
 {
-    /**
-     * Processa a requisição.
-     *
-     * @param \Closure(Request): Response $next próximo middleware da cadeia
-     * @return Response resposta (pode ser do middleware ou do próximo)
-     */
+    /** @param \Closure(Request): Response $next proximo middleware da cadeia */
     public function handle(Request $request, \Closure $next): Response;
 }

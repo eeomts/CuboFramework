@@ -57,7 +57,7 @@ final class InitCommand implements Command
         return Kernel::EXIT_SUCCESS;
     }
 
-    /** O ponto significa a pasta atual; qualquer outro nome vira subpasta. */
+    /** O ponto e a pasta atual; qualquer outro nome vira subpasta. */
     private function resolveDestination(string $alvo): string
     {
         $cwd = (string) getcwd();

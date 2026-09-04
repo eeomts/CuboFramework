@@ -40,16 +40,14 @@ class Date
 		return self::parseDate($data)->sub(self::interval($value, $type))->format('d/m/Y H:i:s');
 	}
 
-	/** Recebe a data em qualquer formatação e devolve no formato pedido. */
+	/** Recebe a data em qualquer formatacao e devolve no formato pedido. */
 	public static function formataData(string $data, string $formato): string
 	{
 		return self::parseDate($data)->format($formato);
 	}
 
 
-	/**
-	 * @param string $unit 'Y' anos, 'M' meses, 'D' dias, 'H' horas, 'I' minutos; vazio devolve segundos
-	 */
+	/** @param string $unit 'Y' anos, 'M' meses, 'D' dias, 'H' horas, 'I' minutos; vazio devolve segundos */
 	public static function diff(string $begin, string $end, string $unit = ''): int
 	{
 		$diff = self::parseDate($end)->getTimestamp() - self::parseDate($begin)->getTimestamp();
@@ -80,10 +78,7 @@ class Date
 	}
 
 	/**
-	 * Igual ao convert, mas devolve null em vez de estourar quando a data nao casa.
-	 *
-	 * Existe para quem processa formulario: entrada torta e caso esperado ali, e
-	 * try/catch dentro de laco esconde o fluxo normal.
+	 * O convert sem exception: entrada torta e caso esperado em formulario.
 	 */
 	public static function tryConvert(string $date, string $format): ?string
 	{
@@ -113,10 +108,7 @@ class Date
 		return (int) $h * 3600 + (int) $m * 60 + (int) $s;
 	}
 
-	/**
-	 * Diferença entre duas durações H:i:s. (ex-getDiffHour)
-	 * $return 'hr' devolve HH:MM:SS; qualquer outro valor devolve segundos (int).
-	 */
+	/** $return 'hr' devolve HH:MM:SS; qualquer outro valor devolve segundos. */
 	public static function diffHours(string $start, string $end, string $return = 'hr'): string|int
 	{
 		$diff = self::durationToSeconds($end) - self::durationToSeconds($start);
@@ -133,7 +125,7 @@ class Date
 	}
 
 	/**
-	 * Data por extenso. $type 'dh' inclui " as HH:MM"; 'd' devolve só a data.
+	 * $type 'dh' inclui " as HH:MM"; 'd' devolve so a data.
 	 *
 	 * @example spellDate('2026-01-05 15:30:00') => '05 de janeiro de 2026 as 15:30'
 	 */
@@ -153,7 +145,7 @@ class Date
 	}
 
 	/**
-	 * Valida a data, inclusive a existencia real do dia.
+	 * Valida inclusive a existencia real do dia.
 	 * $type: en=Y-m-d H:i:s, br=d/m/Y H:i:s, -br=d/m/Y, -en=Y-m-d.
 	 */
 	public static function isValidFormat(string $date, string $type = 'en'): bool
@@ -195,8 +187,7 @@ class Date
 			date('d-m', $easter), // Páscoa
 			date('d-m', $easter - 47 * 86400), // Carnaval
 			date('d-m', $easter + 60 * 86400), // Corpus Christi
-			date('d-m', $easter - 2 * 86400), 
-			// Sexta-feira da Paixão
+			date('d-m', $easter - 2 * 86400), // Sexta-feira da Paixao
 		]);
 
 		if (in_array(date('d-m', $timestamp), $holidays, true)) {
@@ -244,8 +235,8 @@ class Date
 	#PRIVATES
 
 	/**
-	 * H:i sem segundos existe porque e o que o input type=time manda.
-	 * O `|` zera o que nao foi lido, senao a hora herda os segundos do relogio.
+	 * H:i sem segundos e o que o input type=time manda. O `|` zera o que nao foi
+	 * lido, senao a hora herda os segundos do relogio.
 	 *
 	 * @throws \InvalidArgumentException se nenhum formato casar
 	 */
@@ -260,11 +251,8 @@ class Date
 			$dat = \DateTimeImmutable::createFromFormat($format, $data);
 			$erros = \DateTimeImmutable::getLastErrors();
 
-			// createFromFormat NAO devolve false para data impossível: ele
-			// transborda (2026-02-30 vira 2026-03-02) e só registra um warning.
-			// Sem conferir getLastErrors o parse aceitava a data inexistente e
-			// devolvia outra, calada. O isValidFormat desta mesma classe já
-			// recusava esse caso; aqui faltava.
+			# createFromFormat NAO devolve false para data impossivel: transborda
+			# (2026-02-30 vira 2026-03-02) e so registra warning. Dai o getLastErrors.
 			if ($dat !== false && ($erros === false || $erros['warning_count'] === 0)) {
 				return $dat;
 			}

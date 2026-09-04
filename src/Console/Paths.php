@@ -6,7 +6,6 @@ readonly class Paths
 {
     public function __construct(public string $frameworkRoot) {}
 
-    /** Fallback quando ninguem informa: a raiz e o pai de src/. */
     public static function detect(): self
     {
         return new self(dirname(__DIR__, 2));
@@ -17,7 +16,6 @@ readonly class Paths
         return $this->frameworkRoot . DIRECTORY_SEPARATOR . 'src';
     }
 
-    /** O build copia este arquivo junto do src/, senao o projeto gerado nao sabe a versao. */
     public function versionFile(): string
     {
         return $this->frameworkRoot . DIRECTORY_SEPARATOR . 'VERSION';

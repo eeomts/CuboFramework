@@ -16,16 +16,12 @@ use Cubo\Http\Request;
 
 class Router
 {
-    /** Chave de config onde o Bootstrapper deixa a tabela de rotas. */
     public const ROUTES = 'routes';
 
     /**
-     * @param SegmentMapper $mapper diz o que os segmentos de cabeca significam.
-     *                              Sem argumento, vale o padrao controlador/acao.
-     * @param string|null $basePath subpasta onde a app esta montada ('/app/').
-     *                              Nulo tira do host declarado no config.ini.
-     * @param RouteCollection|null $routes tabela de rotas declaradas, consultada
-     *                              antes da convencao. Sem ela, so ha convencao.
+     * @param SegmentMapper $mapper padrao: controlador/acao
+     * @param string|null $basePath subpasta onde a app esta montada; nulo tira do config.ini
+     * @param RouteCollection|null $routes consultada antes da convencao
      */
     public function __construct(
         private SegmentMapper $mapper = new ControllerActionMapper(),
@@ -33,25 +29,19 @@ class Router
         private ?RouteCollection $routes = null,
     ) {}
 
-    /**
-     * Monta a rota a partir do caminho da requisicao.
-     *
-     * A tabela de rotas tem precedencia; sem rota declarada que case, quem da
-     * significado aos segmentos e o SegmentMapper.
-     */
+    /** A tabela de rotas tem precedencia; sem rota que case, vale o SegmentMapper. */
     public function parseUrl(Request $request): Route
     {
         $path = $this->requestPath($request);
 
-        // a tabela casa o caminho CRU: uma rota '/grid-menus' declarada nunca
-        // casaria contra o segmento ja convertido em camelCase
+        # a tabela casa o caminho CRU: '/grid-menus' nunca casaria contra o segmento ja em camelCase
         $declarada = $this->tabela()?->match($path, $request->method());
 
         if ($declarada !== null) {
             return $declarada;
         }
 
-        // cada segmento vira camelCase (ex: grid-menus -> gridMenus)
+        # cada segmento vira camelCase (grid-menus -> gridMenus)
         $parsed = [];
         foreach (explode('/', $path) as $segment) {
             $parsed[] = $this->toCamelCase($segment);
@@ -69,10 +59,7 @@ class Router
         );
     }
 
-    /**
-     * Caminho da requisicao sem a subpasta de montagem e sem query string.
-     * O dominio nao participa: rota e caminho, nao host.
-     */
+    /** Sem a subpasta de montagem e sem query string; o dominio nao participa. */
     private function requestPath(Request $request): string
     {
         $path = $request->path();
@@ -87,10 +74,7 @@ class Router
         return trim($path, '/');
     }
 
-    /**
-     * Tabela injetada tem precedencia; sem ela, vale a que o Bootstrapper
-     * carregou do [app] routes. Mesmo arranjo do basePath.
-     */
+    /** Tabela injetada tem precedencia; sem ela vale a do [app] routes. */
     private function tabela(): ?RouteCollection
     {
         if ($this->routes !== null) {
@@ -141,10 +125,7 @@ class Router
         return [$params, $rawParams];
     }
 
-    /**
-     * Transforma um path de metodo em camelCase, preservando o controlador.
-     * ex: grid-menus-filho -> gridMenusFilho ; ctrl/grid-menus -> Ctrl/gridMenus
-     */
+    /** grid-menus-filho -> gridMenusFilho ; ctrl/grid-menus -> Ctrl/gridMenus */
     public function transformMethod(string $value): string
     {
         $parts = explode('/', $value);
@@ -155,29 +136,19 @@ class Router
         return $this->toCamelCase($value);
     }
 
-    /**
-     * Nome do modulo da rota, em Title Case.
-     *
-     * @param Route $route rota de onde sai o nome (modulo, ou controlador sem modulo)
-     */
+    /** @param Route $route de onde sai o nome: modulo, ou controlador sem modulo */
     public function getNameModule(Route $route): string
     {
         return ucwords(strtolower($route->module ?? $route->controller));
     }
 
-    /**
-     * URL base para exportacao/impressao (host + modulo).
-     */
+    /** Host + modulo, para exportacao/impressao. */
     public function getUrlExport(Route $route): string
     {
         return Config::getInstance()->getConfig('ini.cubo.host') . $this->getNameModule($route);
     }
 
-    /**
-     * Converte um segmento "com-hifen" em camelCase.
-     * Primeiro pedaco fica como esta; os seguintes recebem ucfirst.
-     * Sem hifen: so faz ucfirst quando nao ha 2o caractere (quirk mantido).
-     */
+    /** "com-hifen" em camelCase: o primeiro pedaco fica como esta, os seguintes recebem ucfirst. */
     private function toCamelCase(string $value): string
     {
         $parts = explode('-', $value);
@@ -190,7 +161,7 @@ class Router
             return $out;
         }
 
-        // sem hifen: quirk do v1 -> ucfirst so quando 2o caractere e vazio/'0'
+        # sem hifen: ucfirst so quando o 2o caractere e vazio/'0'
         $second = $value[1] ?? '';
         return ($second === '' || $second === '0') ? ucfirst($value) : $value;
     }

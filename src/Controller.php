@@ -20,21 +20,17 @@ abstract class Controller
 
     protected Request $_request;
 
-    /** Rota que originou a requisicao. */
     protected ?Route $_route;
 
     /** @var Db|null */
     protected ?Db $_db = null;
 
-    /** Controlador do modulo que atende a requisicao. */
     protected ?Controller $_module = null;
 
     /** @var (\Closure(): View)|null */
     private static ?\Closure $_defaultViewFactory = null;
 
     /**
-     * @param Route|null $route rota resolvida pelo Router
-     * @param Request|null $request requisicao HTTP
      * @param View|null $view se omitida, usa a fabrica padrao
      */
     public function __construct(?Route $route = null, ?Request $request = null, ?View $view = null)
@@ -61,16 +57,12 @@ abstract class Controller
         return (self::$_defaultViewFactory)();
     }
 
-    /**
-     * Inicializacoes anteriores a execucao dos metodos principais.
-     */
+    /** Inicializacoes anteriores a execucao dos metodos principais. */
     public function initialize(): void
     {
     }
 
-    /**
-     * Executado quando a url nao traz instrucao de metodo.
-     */
+    /** Executado quando a url nao traz instrucao de metodo. */
     public function index(): void
     {
     }
@@ -80,10 +72,7 @@ abstract class Controller
         $this->_view->render();
     }
 
-    /**
-     * Devolve o modulo que atende a requisicao; sem modulo resolvido, o proprio
-     * controlador responde.
-     */
+    /** Sem modulo resolvido, o proprio controlador responde. */
     public function getModule(): Controller
     {
         return $this->_module ?? $this;

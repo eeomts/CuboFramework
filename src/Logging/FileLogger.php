@@ -5,11 +5,8 @@ namespace Cubo\Logging;
 /**
  * Logger que grava em arquivo (modo append, com lock).
  *
- * Herda o comportamento do antigo Cubo_ErrorManager (fwrite em log.txt), mas
- * isolado atrás da {@see LoggerInterface}. É esta classe que "envelopa" a
- * mensagem com timestamp e nível — quem chama só passa o texto.
- *
- * Se a escrita falhar, cai no error_log do PHP para não engolir o erro original.
+ * E esta classe que envelopa a mensagem com timestamp e nivel; quem chama so
+ * passa o texto. Escrita que falha cai no error_log do PHP.
  *
  * @package Cubo
  * @author v1: João (Cubo_ErrorManager::errorHandler)
@@ -17,9 +14,7 @@ namespace Cubo\Logging;
  */
 final class FileLogger implements LoggerInterface
 {
-    /**
-     * @param string $logFile Caminho absoluto do arquivo de log.
-     */
+    /** @param string $logFile caminho absoluto do arquivo de log */
     public function __construct(private readonly string $logFile) {}
 
     public function error(string $message): void

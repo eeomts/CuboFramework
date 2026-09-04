@@ -12,11 +12,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Traduz o $_POST dos filtros de grid em condicoes de busca.
- *
- * Substitui Cubo_Tools::prepareSearch(), que devolvia uma string de WHERE
- * concatenada. Aqui cada condicao entra no Builder com BIND, e o valor nunca
- * vira SQL.
- *
  * Convencoes de nome de campo (contrato dos grids):
  * - "tabela:coluna" -> "tabela.coluna"
  * - fk_* -> igualdade exata; array vira whereIn
@@ -40,8 +35,6 @@ final class SearchCriteria
     public function applyTo(Builder $query): Builder
     {
         foreach ($this->post as $field => $value) {
-            // quirk do v1: empty() descarta ''/null/0/'0'/[], entao filtrar por
-            // valor zero nunca funcionou. Mantido para nao mudar o resultado dos grids.
             if (empty($value)) {
                 continue;
             }
@@ -75,12 +68,6 @@ final class SearchCriteria
 
     /**
      * Nome da coluna sem o nome da tabela.
-     *
-     * Bug do v1 corrigido: la o teste era preg_match('/./', $index) -- um ponto solto
-     * na regex casa QUALQUER caractere, entao sempre entrava no explode e lia $exp[1],
-     * que era null quando o campo nao tinha ponto. Resultado: $column_name virava null,
-     * nenhuma regra (fk_, data_, mon_) casava e tudo caia no LIKE. Aqui a checagem
-     * e literal, entao as regras passam a valer tambem para campo sem tabela.
      */
     private function columnName(string $column): string
     {
@@ -98,10 +85,6 @@ final class SearchCriteria
             || str_contains($name, 'updated');
     }
 
-    /**
-     * Campo de data: os sufixos _begin/_end viram intervalo na MESMA coluna.
-     * ex: data_cadastro_begin=01/01/2026 -> where('data_cadastro', '>=', '2026-01-01')
-     */
     private function applyDate(Builder $query, string $column, string $value): void
     {
         $date = Date::formataData($value, 'Y-m-d');
@@ -120,7 +103,7 @@ final class SearchCriteria
         $query->where($column, 'LIKE', "%{$date}%");
     }
 
-    /** "1.234,56" (BR) -> "1234.56" (SQL) */
+    # "1.234,56" (BR) -> "1234.56" (SQL) 
     private function toDecimal(string $value): string
     {
         return str_replace(',', '.', str_replace('.', '', $value));

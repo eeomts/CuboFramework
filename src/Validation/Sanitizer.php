@@ -6,26 +6,21 @@ use Cubo\Tools\Date;
 use Cubo\Tools\Number;
 
 /**
- * Normaliza dados crus contra filtros declarativos, antes de validar.
+ * Normaliza dados crus contra filtros declarativos. Roda ANTES do Validator,
+ * senao a regra `numeric` reprova um "1.234,56" que era valido.
  *
- * O Validator responde "esse dado presta?"; este responde "esse dado, na forma
- * que o formulario mandou, vira o que?". Sao passos diferentes: sanitiza e
- * depois valida, senao a regra `numeric` reprova um "1.234,56" que era valido.
- *
- * Contrato de ausencia, igual para todo filtro:
+ * Contrato de ausencia:
  * - campo fora do array continua fora (quem cobra falta e o `required`);
  * - campo presente e vazio vira null;
  * - campo presente e impossivel de converter vira null e registra erro.
  *
- * Os filtros de texto (trim, upper, lower, digits) fogem do meio dessa regra de
- * proposito: sao transformacao pura de string e devolvem '' em vez de null.
+ * Os filtros de texto (trim, upper, lower, digits) devolvem '' em vez de null.
  *
  * @package Cubo
  * @author Mateus - github.com/eeomts
  */
 class Sanitizer
 {
-    /** Filtros aceitos; nome fora daqui e erro de quem escreveu a regra. */
     private const FILTROS = [
         'trim', 'money', 'date', 'int', 'float',
         'digits', 'upper', 'lower',
@@ -40,7 +35,7 @@ class Sanitizer
     private array $errors = [];
 
     /**
-     * @param array<string, mixed> $original o cru, guardado para sanitize() poder repetir
+     * @param array<string, mixed> $original o cru, para sanitize() poder repetir
      * @param array<string, string> $rules campo => 'trim|money'
      */
     public function __construct(
@@ -53,8 +48,7 @@ class Sanitizer
     /** @return bool true quando nenhum campo caiu no caminho do erro */
     public function sanitize(): bool
     {
-        // recomeca do cru: rodar de novo em cima do ja convertido daria outro
-        // resultado, e um valor que virou null esconderia o erro da primeira vez
+        # recomeca do cru: em cima do ja convertido, um valor que virou null esconderia o erro anterior
         $this->data = $this->original;
         $this->errors = [];
 
@@ -66,7 +60,7 @@ class Sanitizer
             foreach (explode('|', $ruleString) as $rule) {
                 $rule = trim($rule);
 
-                // null e ponto final: filtro seguinte nao tem o que converter
+                # null e ponto final: filtro seguinte nao tem o que converter
                 if ($this->data[$field] === null) {
                     break;
                 }
@@ -81,8 +75,7 @@ class Sanitizer
     }
 
     /**
-     * O array inteiro, e nao so os campos declarados: sanitizar dois campos de
-     * dez nao pode sumir com os outros oito.
+     * O array INTEIRO, e nao so os campos declarados.
      *
      * @return array<string, mixed>
      */
@@ -122,8 +115,7 @@ class Sanitizer
             );
         }
 
-        // array e objeto chegam aqui quando o formulario manda `campo[]` num
-        // campo escalar; converter na marra viraria "Array" ou fatal
+        # formulario mandando `campo[]` num campo escalar: converter na marra viraria "Array" ou fatal
         if (!is_scalar($value)) {
             $this->errors[$field][] = "{$field} nao aceita valor composto";
 
@@ -156,15 +148,14 @@ class Sanitizer
         return [trim($rule), null];
     }
 
-    /** @param string|null $param numero de casas decimais; o padrao e 2 */
+    /** @param string|null $param casas decimais; o padrao e 2 */
     private function filterMoney(string $field, string $value, ?string $param): ?string
     {
         if (trim($value) === '') {
             return null;
         }
 
-        // sem digito nenhum o parseMoney devolveria 0.0, que mente: o usuario
-        // digitou algo, so nao era dinheiro
+        # sem digito o parseMoney devolveria 0.0, que mente: o usuario digitou algo, so nao era dinheiro
         if (!preg_match('/\d/', $value)) {
             $this->errors[$field][] = "{$field} nao e um valor monetario valido";
 
@@ -174,7 +165,7 @@ class Sanitizer
         return Number::toDecimal($value, $param === null ? self::CASAS_PADRAO : (int) $param);
     }
 
-    /** @param string|null $param apelido de formato do Date::convert; o padrao e 'eng' */
+    /** @param string|null $param apelido do Date::convert; o padrao e 'eng' */
     private function filterDate(string $field, string $value, ?string $param): ?string
     {
         $value = trim($value);
@@ -200,7 +191,7 @@ class Sanitizer
             return null;
         }
 
-        // "3.7" nao vira 3 calado: truncar por conta propria perde dado sem avisar
+        # "3.7" nao vira 3 calado: truncar perde dado sem avisar
         if (!preg_match('/^-?\d+$/', $value)) {
             $this->errors[$field][] = "{$field} deve ser um numero inteiro";
 
@@ -218,7 +209,7 @@ class Sanitizer
             return null;
         }
 
-        // sintaxe numerica do PHP, com ponto decimal; para entrada BR use money
+        # sintaxe do PHP, com ponto decimal; para entrada BR use money
         if (!is_numeric($value)) {
             $this->errors[$field][] = "{$field} deve ser um numero";
 

@@ -5,9 +5,9 @@ namespace Cubo\Console;
 readonly class Input
 {
     /**
-     * @param string $command nome do comando; vazio quando nao foi informado
-     * @param list<string> $arguments posicionais, ja sem o nome do comando
-     * @param array<string,string|bool> $options --flag vira true, --k=v vira 'v'
+     * @param string $command nome do comando
+     * @param list<string> $arguments 
+     * @param array<string,string|bool> $options
      */
     public function __construct(
         public string $command = '',

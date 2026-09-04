@@ -4,7 +4,6 @@ namespace Cubo\Database\Migrations;
 
 /**
  * Molde de uma migration.
- *
  * @package Cubo
  * @author Mateus - github.com/eeomts
  */
@@ -14,7 +13,6 @@ abstract class Migration
 
     /**
      * Desfaz o que o up() fez.
-     *
      */
     abstract public function down(Schema $schema): void;
 }

@@ -11,8 +11,8 @@ namespace Cubo\Exceptions;
 final class MissingDependencyException extends CuboException
 {
     /**
-     * @param string $package pacote Composer que falta (ex: 'mpdf/mpdf')
-     * @param string $usedBy classe do Cubo que precisa dele
+     * @param string $package pacote que falta 
+     * @param string $usedBy classe que precisa
      */
     public static function for(string $package, string $usedBy): self
     {

@@ -13,13 +13,7 @@ class Response
     private array $headers = [];
     private string $body = '';
 
-    /**
-     * Factory para resposta JSON.
-     *
-     * @throws \JsonException se o dado nao for serializavel; sem isso o
-     *                        json_encode devolveria false e o corpo sairia vazio
-     *                        com status 200
-     */
+    /** @throws \JsonException sem isso o corpo sairia vazio com status 200 */
     public static function json(mixed $data, int $status = 200): self
     {
         $r = new self();
@@ -30,7 +24,6 @@ class Response
         return $r;
     }
 
-    /** Factory para redirect. */
     public static function redirect(string $url, int $status = 302): self
     {
         $r = new self();
@@ -39,7 +32,6 @@ class Response
         return $r;
     }
 
-    /** Factory para resposta com string simples. */
     public static function text(string $text, int $status = 200): self
     {
         $r = new self();
@@ -48,7 +40,6 @@ class Response
         return $r;
     }
 
-    /** Factory para resposta HTML. */
     public static function html(string $html, int $status = 200): self
     {
         $r = new self();
@@ -78,8 +69,7 @@ class Response
 
     public function send(): void
     {
-        // corpo ja emitido significa cabecalho ja enviado; insistir so produz
-        // "headers already sent" e nao muda nada
+        # corpo ja emitido significa cabecalho ja enviado
         if (!headers_sent()) {
             http_response_code($this->status);
 

@@ -14,7 +14,7 @@ final class Security
     /** Escapa um valor para inserção segura em HTML (defesa contra XSS). */
     public static function escape(string $val): string
     {
-        // ENT_SUBSTITUTE: byte UTF-8 invalido vira caractere de reposicao, nao string vazia
+        # ENT_SUBSTITUTE: byte UTF-8 invalido vira caractere de reposicao, nao string vazia
         return htmlspecialchars($val, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 

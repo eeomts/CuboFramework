@@ -50,31 +50,19 @@ final class Session
         $_SESSION[$index] = $value;
     }
 
-    /**
-     * Le um valor da sessao por caminho com ponto.
-     *
-     * @example get('login.nome') retorna $_SESSION['login']['nome']
-     */
+    /** @example get('login.nome') retorna $_SESSION['login']['nome'] */
     public function get(string $index, mixed $default = ''): mixed
     {
         return Arr::get($_SESSION, $index, $default);
     }
 
-    /**
-     * Retorna todos os dados da sessao.
-     *
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function all(): array
     {
         return $_SESSION;
     }
 
-    /**
-     * Remove um item da sessao por caminho com ponto, sem eval.
-     *
-     * @example remove('login.nome') faz unset em $_SESSION['login']['nome']
-     */
+    /** @example remove('login.nome') faz unset em $_SESSION['login']['nome'] */
     public function remove(string $index): void
     {
         $keys = explode('.', $index);

@@ -32,7 +32,7 @@ final class Word
                 header("Content-Disposition: attachment; filename=\"{$file}\"");
                 echo $doc;
                 break;
-            // 'S' apenas retorna a string
+            # 'S' apenas retorna a string
         }
 
         return $doc;

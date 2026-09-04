@@ -23,7 +23,7 @@ class StorageException extends CuboException
         return new self("Falha ao gravar o arquivo '{$storedName}'.", self::CODE_WRITE_FAILED);
     }
 
-    /** Traduz o codigo de erro que o proprio PHP poe em $_FILES['error']. */
+    /** Traduz o codigo de erro que o proprio PHP */
     public static function phpUploadFailed(int $phpErrorCode): self
     {
         $reasons = [

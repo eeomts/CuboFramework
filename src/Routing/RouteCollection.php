@@ -3,11 +3,8 @@
 namespace Cubo\Routing;
 
 /**
- * Tabela de rotas declaradas.
- *
- * Existe para o que a convencao nao alcanca: verbo HTTP, URL que nao espelha
- * nome de classe, middleware por rota e URL gerada por nome. O que nao estiver
- * declarado aqui continua caindo na convencao do Router.
+ * Tabela de rotas declaradas: o que a convencao do Router nao alcanca (verbo
+ * HTTP, URL que nao espelha classe, middleware por rota, URL gerada por nome).
  *
  * @package Cubo
  * @author Mateus - github.com/eeomts
@@ -66,13 +63,11 @@ class RouteCollection
     }
 
     /**
-     * Primeira rota declarada que casa caminho E verbo.
-     *
-     * A ordem de declaracao decide: a primeira que casar vence, entao rota mais
-     * especifica vem antes da mais generica.
+     * A ordem de declaracao decide: a primeira que casar vence, entao rota
+     * especifica vem antes da generica.
      *
      * @param string $path caminho ja relativo a subpasta da app
-     * @return Route|null null quando nada casa, e o Router cai na convencao
+     * @return Route|null null quando nada casa e o Router cai na convencao
      */
     public function match(string $path, string $verbo): ?Route
     {
@@ -120,8 +115,6 @@ class RouteCollection
     }
 
     /**
-     * URL de uma rota nomeada.
-     *
      * @param array<string, string|int> $params
      * @throws \InvalidArgumentException se a rota nao existir
      */

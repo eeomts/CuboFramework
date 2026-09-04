@@ -25,11 +25,9 @@ final class LocalFileStore implements FileStore
 
         $destination = $this->fullPath($storedName);
 
-        // move_uploaded_file so aceita arquivo que veio de fato por HTTP POST, e e
-        // essa checagem que impede alguem forjar um tempPath apontando para, por
-        // exemplo, /etc/passwd. O rename e o caminho de teste/CLI, onde nao existe
-        // upload real -- por isso ele fica no else, nunca como alternativa em caso
-        // de falha do primeiro.
+        # move_uploaded_file so aceita arquivo vindo de HTTP POST: e o que impede
+        # forjar um tempPath apontando para /etc/passwd. O rename e o caminho de
+        # teste/CLI, por isso fica no else e nunca como fallback de falha.
         $moved = is_uploaded_file($file->tempPath)
             ? move_uploaded_file($file->tempPath, $destination)
             : rename($file->tempPath, $destination);
@@ -57,10 +55,8 @@ final class LocalFileStore implements FileStore
     }
 
     /**
-     * Caminho absoluto do arquivo.
-     *
-     * basename() e a trava contra path traversal: mesmo que um nome com '../'
-     * chegue aqui, ele nao escapa do diretorio.
+     * basename() e a trava contra path traversal: nome com '../' nao escapa do
+     * diretorio.
      */
     public function fullPath(string $storedName): string
     {

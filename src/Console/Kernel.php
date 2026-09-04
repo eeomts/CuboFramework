@@ -33,7 +33,6 @@ final class Kernel
         }
     }
 
-    /** Sem comando, --version e --help viram os comandos correspondentes. */
     private function resolveName(Input $input): string
     {
         if ($input->command !== '') {

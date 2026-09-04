@@ -21,12 +21,8 @@ final class Schema
 
     /**
      * Cria a tabela.
-     *
-     * @param bool $exigeColunasDeControle false dispensa created/updated/deleted,
-     *                                     para tabela de vinculo puro
-     * @param bool $validarConvencao escotilha de fuga; desligar deixa passar
-     *                               qualquer nome, e o custo e perder os
-     *                               automatismos de SearchCriteria e SoftDelete
+     * @param bool $exigeColunasDeControle false dispensa created/updated/deleted, para tabela de vinculo puro
+     * @param bool $validarConvencao escotilha de fuga; desligar deixa passar qualquer nome, e o custo e perder os automatismos de SearchCriteria e SoftDelete
      */
     public function create(
         string $tabela,
@@ -46,12 +42,6 @@ final class Schema
         $this->executar($blueprint);
     }
 
-    /**
-     * Altera a tabela.
-     *
-     * Aqui a checagem de colunas de controle nao vale: um ALTER que acrescenta
-     * uma coluna nao repete created/updated/deleted, que ja existem.
-     */
     public function table(string $tabela, Closure $definicao, bool $validarConvencao = true): void
     {
         $blueprint = new Blueprint($tabela);

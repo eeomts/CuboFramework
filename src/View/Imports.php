@@ -12,7 +12,6 @@ use Cubo\Exceptions\CuboException;
  */
 final class Imports
 {
-    /** Grupo que vale quando o template nao pede nenhum. */
     public const GRUPO_PADRAO = 'base';
 
     /** @var array<string, string>|null grupo => html cru */
@@ -20,8 +19,7 @@ final class Imports
 
     /**
      * @param string $arquivo caminho absoluto do imports.html
-     * @param string $publicRoot raiz servida, para achar o arquivo em disco e
-     *                           carimbar a versao pelo filemtime
+     * @param string $publicRoot raiz servida; acha o arquivo e carimba a versao pelo filemtime
      * @param string $basePath subpasta onde a app esta montada ('/blog/')
      */
     public function __construct(

@@ -11,7 +11,6 @@ use Cubo\Tools\Docs;
  */
 class Validator
 {
-    /** Regras aceitas; nome fora daqui e erro de quem escreveu a regra. */
     private const REGRAS = [
         'required', 'email', 'min', 'max',
         'numeric', 'cpf', 'cnpj', 'url', 'confirmed',
@@ -48,8 +47,7 @@ class Validator
     {
         [$name, $param] = $this->parseRule($rule);
 
-        // antes do curto-circuito abaixo: um nome errado precisa estourar mesmo
-        // que o campo ja tenha reprovado numa regra anterior
+        # nome errado estoura mesmo que o campo ja tenha reprovado numa regra anterior
         if (!in_array($name, self::REGRAS, true)) {
             throw new \InvalidArgumentException(
                 "Regra de validacao desconhecida: '{$name}' (campo '{$field}'). "

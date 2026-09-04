@@ -6,7 +6,7 @@ use Cubo\Exceptions\SchemaConventionException;
 use Illuminate\Database\Schema\Blueprint;
 
 /**
- * Verifica se a tabela declarada respeita a convenção de schema do Cubo.
+ * Verifica se a tabela declarada respeita a convenção do Cubo.
  * @package Cubo
  * @author Mateus - github.com/eeomts
  */
@@ -27,9 +27,7 @@ final class SchemaGuard
     private const TIPOS_MONETARIO = ['decimal', 'float', 'double'];
 
     /**
-     * @param bool $exigeColunasDeControle tabela de vinculo puro pode nao ter
-     *                                     created/updated/deleted -- e o mesmo
-     *                                     caso que sobrescreve usesSoftDelete()
+     * @param bool $exigeColunasDeControle tabela de vinculo puro pode nao ter created/updated/deleted -- e o mesmo caso que sobrescreve usesSoftDelete()
      * @throws SchemaConventionException
      */
     public function validar(Blueprint $blueprint, bool $exigeColunasDeControle = true): void

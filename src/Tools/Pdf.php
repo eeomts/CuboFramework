@@ -48,8 +48,7 @@ final class Pdf
     /**
      * Anexa PDFs ao final, cada um precedido por uma pagina "Anexo N".
      *
-     * @param list<string> $attachments caminhos ja resolvidos; item inexistente
-     *                                  ou que nao seja .pdf e ignorado
+     * @param list<string> $attachments caminhos ja resolvidos; nao-.pdf e ignorado
      */
     public static function fromHtmlWithAttachments(
         string $html,
@@ -95,9 +94,7 @@ final class Pdf
 
     # ------------------------------------------------------------------- PRIVATE
 
-    /**
-     * @param string $margins "left,right,top,bottom" em mm
-     */
+    /** @param string $margins "left,right,top,bottom" em mm */
     private static function makeMpdf(string $orientation, string $margins = '0,0,5,0'): Mpdf
     {
         if (!class_exists(Mpdf::class)) {

@@ -3,10 +3,7 @@
 namespace Cubo\Http;
 
 /**
- * Aplica os cabecalhos de CORS como middleware.
- *
- * O Cors calcula, este middleware pluga o calculo no ciclo da requisicao:
- * responde o preflight sem chegar no controlador e carimba a resposta real.
+ * Pluga o calculo do Cors no ciclo da requisicao.
  *
  * @package Cubo
  * @author Mateus - github.com/eeomts

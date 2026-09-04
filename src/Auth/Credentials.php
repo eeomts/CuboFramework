@@ -5,9 +5,6 @@ namespace Cubo\Auth;
 /**
  * Par app_id / app_secret extraido do header Authorization.
  *
- * Header malformado devolve null em vez de warning, e o segredo pode conter ":"
- * -- so o primeiro separa.
- *
  * @package Cubo
  * @author v2: Mateus - github.com/eeomts
  */
@@ -19,19 +16,14 @@ final readonly class Credentials
     ) {
     }
 
-    /**
-     * Interpreta o valor do header Authorization ("app_id:app_secret").
-     *
-     * @return self|null null quando o header falta ou esta malformado -- quem
-     *                  chama trata isso como "nao autenticado", sem warning.
-     */
+    /** @return self|null null quando o header falta ou esta malformado */
     public static function fromHeader(?string $header): ?self
     {
         if ($header === null || trim($header) === '') {
             return null;
         }
 
-        // Limite 2: so o PRIMEIRO ":" separa; o resto pertence ao segredo.
+        # limite 2: so o PRIMEIRO ":" separa, o resto pertence ao segredo
         $parts = explode(':', trim($header), 2);
 
         if (count($parts) !== 2) {
